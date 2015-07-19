@@ -27,7 +27,7 @@ class FontRenderer(val supportedChars: Array[Char], _font: Font = null) {
       _font
     }
 
-  val map = new TextureMap(new FilePointer("fonts/"+font.getName()+"/", FileType.VIRTUAL), forceResize = false, putInCorner = true)
+  val map = new TextureMap(new FilePointer("fonts/"+font.getName()+"/", FileType.VIRTUAL))
 
   for(c <- supportedChars) {
     val img = font.generateImage(c)

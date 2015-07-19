@@ -1,6 +1,8 @@
 import org.jglr.phiengine.client.render.{Colors, LevelRenderer, Texture}
 import org.jglr.phiengine.client.render.g2d.{Sprite, SpriteBatch}
 import org.jglr.phiengine.client.text.{FontFormat, FontRenderer, Font}
+import org.jglr.phiengine.client.ui.UI
+import org.jglr.phiengine.client.ui.components.UILabel
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.entity.Entity
 import org.jglr.phiengine.core.game.Game
@@ -17,13 +19,16 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
 
   override def getName: String = "Test Game2"
 
-  override def update(delta: Float): Unit = {}
+  override def update(delta: Float): Unit = {
+    ui.update(delta)
+  }
 
   var sprite: Sprite = null
 
   var level: Level = null
   var lvlRenderer: LevelRenderer = null
   var font: FontRenderer = null
+  var ui: UI = null
 
   override def init(config: PhiConfig): Unit = {
     batch = new SpriteBatch
@@ -39,6 +44,8 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
     level.spawnEntity(ent)
 
     font = new FontRenderer(FontRenderer.ASCII, Font.get("Roboto", 20, FontFormat.ITALIC, FontFormat.BOLD))
+    ui = new UI(font)
+    ui.addChild(new UILabel(font, s"Hi there, I'm a test string created from a TrueType font (${font.font.getName()})! :D"))
   }
 
   override def render(delta: Float): Unit = {
@@ -49,6 +56,6 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
     sprite.draw(batch)
     batch.end()
     lvlRenderer.render(delta)
-    font.renderString(s"Hi there, I'm a test string created from a TrueType font (${font.font.getName()})! :D", 10, engine.getDisplayHeight()-42, 0, Colors.darkGray)
+    ui.render(delta)
   }
 }

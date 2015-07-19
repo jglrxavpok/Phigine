@@ -14,26 +14,12 @@ import org.jglr.phiengine.core.utils.{ImageUtils, ITickable, StringUtils}
 
 import scala.collection.JavaConversions._
 
-class TextureMap(var base: FilePointer, var forceResize: Boolean, putInCorner: Boolean) extends ITickable with ITexture {
+class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInCorner: Boolean = true) extends ITickable with ITexture {
   private var texture: Texture = null
   private var nullImage: BufferedImage = null
   private var emptyImage: BufferedImage = null
   private var stitcher: Stitcher = null
   private var registredSprites: List[TextureMapSprite] = null
-
-  /**
-   * Creates TextureMap with given loader and base
-   */
-  def this(base: FilePointer, resize: Boolean) {
-    this(base, resize, false)
-  }
-
-  /**
-   * Creates TextureMap with given loader and base
-   */
-  def this(base: FilePointer) {
-    this(base, false)
-  }
 
   registredSprites = new ArrayList[TextureMapSprite]
   initNullAndEmptyImages

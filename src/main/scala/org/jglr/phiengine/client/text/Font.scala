@@ -74,11 +74,31 @@ class Font(javaFont: JFont) {
     javaFont.getFontName
   }
 
-  def getWidth(c: Char) = {
+  def getWidth(c: Char): Float = {
     metrics.charWidth(c)
   }
 
-  def getHeight(c: Char) = {
+  def getHeight(c: Char): Float = {
     height
+  }
+
+  def getWidth(text: String): Float = {
+    val chars = text.toCharArray
+    var size = 0f
+    for(c <- chars) {
+      size += getWidth(c)
+    }
+    size
+  }
+
+  def getHeight(text: String): Float = {
+    val chars = text.toCharArray
+    var size = 0f
+    for(c <- chars) {
+      val h = getHeight(c)
+      if(h > size)
+        size = h
+    }
+    size
   }
 }
