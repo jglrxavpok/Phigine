@@ -81,7 +81,7 @@ class Stitcher {
       g.drawImage(img, x, y, null)
       val minUV = getCoords(x, y, width, height)
       val maxUV = getCoords(x+img.getWidth, y+img.getHeight, width, height)
-      slots.add(new Slot(minUV.x, minUV.y, maxUV.x, maxUV.y, width, height))
+      slots.add(new Slot(minUV.x, 1f-minUV.y, maxUV.x, 1f-maxUV.y, width, height))
     }
     emptySlotImage = ImageUtils.resize(emptySlotImage, tileWidth, tileHeight)
     for (n <- imgs.size until nbrX * nbrY) {
@@ -94,8 +94,8 @@ class Stitcher {
   }
 
   private def getCoords(x: Int, y: Int, width: Int, height: Int): Vec2 = {
-    val xpos: Float = x + 0.5f
-    val ypos: Float = y + 0.5f
+    val xpos: Float = x + 1f/width.toFloat
+    val ypos: Float = y + 1f/height.toFloat
     new Vec2(xpos / width.toFloat, ypos / height.toFloat)
   }
 

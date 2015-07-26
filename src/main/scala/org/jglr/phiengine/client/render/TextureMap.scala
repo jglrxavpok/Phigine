@@ -20,6 +20,7 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
   private var emptyImage: BufferedImage = null
   private var stitcher: Stitcher = null
   private var registredSprites: List[TextureMapSprite] = null
+  private var stitchedImage: BufferedImage = null
 
   registredSprites = new ArrayList[TextureMapSprite]
   initNullAndEmptyImages
@@ -144,7 +145,7 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
       }
       indexes.put(stitcher.addImage(img, name, forceResize), icon)
     }
-    val stitchedImage: BufferedImage = stitcher.stitch
+    stitchedImage = stitcher.stitch
     val indexesIt: Iterator[Integer] = indexes.keySet.iterator
     while (indexesIt.hasNext) {
       val index: Int = indexesIt.next
@@ -160,9 +161,13 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
       }
     }
     texture = Texture.createFrom(stitchedImage)
-
-    //ImageIO.write(stitchedImage, "png", new File(".", "test.png"))
   }
+
+  def writeDebugTexture(): Unit = {
+    ImageIO.write(stitchedImage, "png", new File(".", base.getPath.replace("/", "__")+"_debug.png"))
+  }
+
+  def isCompiled: Boolean = texture != null
 
   /**
    * Gets a texture icon from given name or null if none exists with given name

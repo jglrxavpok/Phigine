@@ -90,10 +90,10 @@ class Sprite(val texture: Texture, val region: TextureRegion) {
     val maxU: Float = if (flipX) region.getMinU else region.getMaxU
     val minV: Float = if (flipY) region.getMaxV else region.getMinV
     val maxV: Float = if (flipY) region.getMinV else region.getMaxV
-    batch.addVertex(bottomLeft.getX + x, bottomLeft.getY + y, zIndex, minU, minV)
-    batch.addVertex(topLeft.getX + x, topLeft.getY + y, zIndex, minU, maxV)
-    batch.addVertex(topRight.getX + x, topRight.getY + y, zIndex, maxU, maxV)
-    batch.addVertex(bottomRight.getX + x, bottomRight.getY + y, zIndex, maxU, minV)
+    batch.addVertex(bottomLeft.getX + x, bottomLeft.getY + y, zIndex, minU, maxV)
+    batch.addVertex(topLeft.getX + x, topLeft.getY + y, zIndex, minU, minV)
+    batch.addVertex(topRight.getX + x, topRight.getY + y, zIndex, maxU, minV)
+    batch.addVertex(bottomRight.getX + x, bottomRight.getY + y, zIndex, maxU, maxV)
     batch.addIndex(1)
     batch.addIndex(0)
     batch.addIndex(2)

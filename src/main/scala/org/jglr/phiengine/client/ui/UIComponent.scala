@@ -2,6 +2,7 @@ package org.jglr.phiengine.client.ui
 
 import java.util.{ArrayList, List}
 
+import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
 import org.jglr.phiengine.core.maths.Vec2
 import org.jglr.phiengine.core.utils.JavaConversions._
@@ -65,14 +66,14 @@ abstract class UIComponent(fontRenderer: FontRenderer) {
     }
   }
 
-  def render(delta: Float): Unit = {
-    renderSelf(delta);
-    children.forEach((c: UIComponent) => c.render(delta))
+  def render(delta: Float, batch: SpriteBatch): Unit = {
+    renderSelf(delta, batch)
+    children.forEach((c: UIComponent) => c.render(delta, batch))
   }
 
   def updateSelf(delta: Float) = {}
 
-  def renderSelf(delta: Float) = {}
+  def renderSelf(delta: Float, batch: SpriteBatch) = {}
 
   def update(delta: Float): Unit = {
     updateSelf(delta)

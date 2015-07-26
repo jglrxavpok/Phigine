@@ -44,20 +44,7 @@ class FontRenderer(val supportedChars: Array[Char], _font: Font = null) {
       val region = map.get(index)
       val w = map.getWidth()*(region.getMaxU-region.getMinU)
       val h = map.getHeight()*(region.getMaxV-region.getMinV)
-      batch.addVertex(posX, posY, z, region.getMinU, 1f-region.getMaxV, color)
-      batch.addVertex(posX, posY+h, z, region.getMinU, 1f-region.getMinV, color)
-      batch.addVertex(posX+w, posY+h, z, region.getMaxU, 1f-region.getMinV, color)
-      batch.addVertex(posX+w, posY, z, region.getMaxU, 1f-region.getMaxV, color)
-
-      batch.addIndex(1)
-      batch.addIndex(0)
-      batch.addIndex(2)
-
-      batch.addIndex(2)
-      batch.addIndex(0)
-      batch.addIndex(3)
-
-      batch.nextSprite()
+      batch.draw(region, posX, posY-h, z, w, h)
       true
     } else {
       false

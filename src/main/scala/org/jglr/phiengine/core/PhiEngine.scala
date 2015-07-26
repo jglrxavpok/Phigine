@@ -134,7 +134,7 @@ class PhiEngine extends IDisposable {
     initLJWGL(config)
     timer = new Timer
     timer.init
-    setProjectionMatrix(new Mat4().orthographic(0, getDisplayWidth(), 0, getDisplayHeight(), -100, 100))
+    setProjectionMatrix(new Mat4().orthographic(0, getDisplayWidth(), getDisplayHeight(), 0, -100, 100))
     networkHandler = new NetworkHandler(this)
     networkHandler.registerChannel("PhiEngine", new PhiChannel(NetworkSide.CLIENT))
     val server: Server = networkHandler.newServer

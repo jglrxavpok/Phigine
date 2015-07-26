@@ -1,5 +1,6 @@
 package org.jglr.phiengine.client.ui.components
 
+import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.render.{Color, Colors}
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
 import org.jglr.phiengine.client.ui.UIComponent
@@ -22,7 +23,7 @@ class UILabel(fontRenderer: FontRenderer, _text: String = "") extends UIComponen
     text = newText
   }
 
-  override def render(delta: Float) = {
+  override def renderSelf(delta: Float, batch: SpriteBatch) = {
     fontRenderer.renderString(text, x, y, z, color, scale)
   }
 
@@ -31,6 +32,5 @@ class UILabel(fontRenderer: FontRenderer, _text: String = "") extends UIComponen
     h = fontRenderer.font.getHeight(text)
   }
 
-  override var w: Float = fontRenderer.font.getWidth(text)
-  override var h: Float = fontRenderer.font.getHeight(text)
+  pack()
 }

@@ -11,7 +11,7 @@ abstract class InputProcessor {
     def invoke(window: Long, xpos: Double, ypos: Double) {
       if (currentMouseX != xpos.toInt || currentMouseY != ypos.toInt) {
         currentMouseX = xpos.toInt
-        currentMouseY = PhiEngine.getInstance.getDisplayHeight - ypos.toInt
+        currentMouseY = ypos.toInt
         onMouseMoved(currentMouseX, currentMouseY)
       }
     }

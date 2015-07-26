@@ -53,7 +53,6 @@ class Shader(shader: FilePointer) {
       } else if (u.name.equals("u_time")) {
         setUniformd(u.name, PhiEngine.getInstance().getTime())
       }
-      return
     })
   }
 
