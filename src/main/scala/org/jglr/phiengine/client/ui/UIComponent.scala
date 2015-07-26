@@ -9,30 +9,31 @@ import scala.collection.JavaConversions._
 
 abstract class UIComponent(fontRenderer: FontRenderer) {
 
-  val chidren: List[UIComponent] = new ArrayList[UIComponent]
-  val layout: UILayout = null
+  val children: List[UIComponent] = new ArrayList[UIComponent]
+  var layout: UILayout = null
   var x: Float = 0
   var y: Float = 0
   var z: Float = 0
-  var w: Float
-  var h: Float
   var minSize: Vec2 = new Vec2(10,10)
+  var w: Float = minSize.x
+  var h: Float = minSize.y
 
   def addChild(child: UIComponent): Unit = {
-    chidren.add(child)
-    if(layout != null)
+    if(children.add(child) && layout != null)
       layout.onComponentAdded(child)
   }
 
   def removeChild(child: UIComponent): Unit = {
-    if(chidren.remove(child) && layout != null)
-    layout.onComponentRemoved(child)
+    if(children.remove(child) && layout != null)
+      layout.onComponentRemoved(child)
   }
 
+  def onMoved(): Unit = {}
+
   def pack(): Unit = {
-    chidren.forEach((c: UIComponent) => c.pack())
+    children.forEach((c: UIComponent) => c.pack())
     if(layout == null) {
-      if(chidren.isEmpty) {
+      if(children.isEmpty) {
         w = minSize.x
         h = minSize.y
       } else {
@@ -40,35 +41,41 @@ abstract class UIComponent(fontRenderer: FontRenderer) {
         var maxX = Float.NegativeInfinity
         var minY = Float.PositiveInfinity
         var maxY = Float.NegativeInfinity
-        for(c <- chidren) {
+        for(c <- children) {
           if(c.x < minX)
-          minX = c.x
+            minX = c.x
 
           if(c.y < minY)
-          minY = c.y
+            minY = c.y
 
           if(c.x+c.w > maxX)
-          maxX = c.x
+            maxX = c.x+c.w
 
           if(c.y+c.h > maxY)
-          maxY = c.y+c.h
+            maxY = c.y+c.h
         }
-
         w = Math.max(minSize.x, maxX-minX)
         h = Math.max(minSize.y, maxY-minY)
       }
     } else {
+      layout.recalculatePositions()
       val size = layout.pack()
-      w = size._1
-      h = size._2
+      w = Math.max(minSize.x, size.x)
+      h = Math.max(minSize.y, size.y)
     }
   }
 
   def render(delta: Float): Unit = {
-    chidren.forEach((c: UIComponent) => c.render(delta))
+    renderSelf(delta);
+    children.forEach((c: UIComponent) => c.render(delta))
   }
 
+  def updateSelf(delta: Float) = {}
+
+  def renderSelf(delta: Float) = {}
+
   def update(delta: Float): Unit = {
-    chidren.forEach((c: UIComponent) => c.update(delta))
+    updateSelf(delta)
+    children.forEach((c: UIComponent) => c.update(delta))
   }
 }

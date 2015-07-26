@@ -2,7 +2,8 @@ import org.jglr.phiengine.client.render.{Colors, LevelRenderer, Texture}
 import org.jglr.phiengine.client.render.g2d.{Sprite, SpriteBatch}
 import org.jglr.phiengine.client.text.{FontFormat, FontRenderer, Font}
 import org.jglr.phiengine.client.ui.UI
-import org.jglr.phiengine.client.ui.components.UILabel
+import org.jglr.phiengine.client.ui.components.{UIButton, UILabel}
+import org.jglr.phiengine.client.ui.layouts.FlowLayout
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.entity.Entity
 import org.jglr.phiengine.core.game.Game
@@ -45,7 +46,13 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
 
     font = new FontRenderer(FontRenderer.ASCII, Font.get("Roboto", 20, FontFormat.ITALIC, FontFormat.BOLD))
     ui = new UI(font)
+    val layout = new FlowLayout(ui, 5f, 5f, FlowLayout.CENTER)
+    ui.layout = layout
     ui.addChild(new UILabel(font, s"Hi there, I'm a test string created from a TrueType font (${font.font.getName()})! :D"))
+    for (i <- 0 to 10) {
+      ui.addChild(new UILabel(font, s"Hi there, I'm the test string number #${i+1}"))
+    }
+    ui.addChild(new UIButton(font, s"Hi there, I'm a button"))
   }
 
   override def render(delta: Float): Unit = {

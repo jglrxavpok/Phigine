@@ -13,6 +13,12 @@ class Vec2(var x: Float = 0, var y: Float = 0) {
     set(x, y)
   }
 
+  def set(v: Vec2): Vec2 = {
+    this.x = v.x
+    this.y = v.y
+    this
+  }
+
   def set(x: Float, y: Float): Vec2 = {
     this.x = x
     this.y = y
