@@ -6,7 +6,7 @@ import org.jglr.phiengine.client.text.FontRenderer
 import org.jglr.phiengine.client.ui.{UITextures, UIComponent}
 import org.jglr.phiengine.client.ui.layouts.RelativeLayout
 
-object UIButton {
+object ButtonTextures {
   var topLeftCorner: TextureRegion = null
   var bottomLeftCorner: TextureRegion = null
   var topRightCorner: TextureRegion = null
@@ -15,6 +15,7 @@ object UIButton {
   var eastEdge: TextureRegion = null
   var westEdge: TextureRegion = null
   var southEdge: TextureRegion = null
+  var center: TextureRegion = null
 
   def genTextures() = {
     topLeftCorner = UITextures.generateIcon("button_tleft")
@@ -25,6 +26,7 @@ object UIButton {
     eastEdge = UITextures.generateIcon("button_east")
     westEdge = UITextures.generateIcon("button_west")
     southEdge = UITextures.generateIcon("button_south")
+    center = UITextures.generateIcon("button_center")
   }
 
 }
@@ -36,30 +38,42 @@ class UIButton(fontRenderer: FontRenderer, text: String = null) extends UICompon
   if(text != null) {
     addChild(new UILabel(fontRenderer, text))
     pack()
-    println(s"$w, $h")
   }
 
   override def renderSelf(delta: Float, batch: SpriteBatch): Unit = {
     val sw = 8f
     val sh = 8f
     batch.begin()
-    batch.draw(UIButton.bottomLeftCorner, x, y, z, sw, sh)
-    batch.draw(UIButton.bottomRightCorner, x+w-sw, y, z, sw, sh)
-    batch.draw(UIButton.topLeftCorner, x, y+h-sh, z, sw, sh)
-    batch.draw(UIButton.topRightCorner, x+w-sw, y+h-sh, z, sw, sh)
+
+    var i1: Float = sw
+    var j1: Float = sh
+    while(j1 < h-sh) {
+      while(i1 < w-sw) {
+        batch.draw(ButtonTextures.center, x+i1, y+j1, z, sw, sh)
+        i1 += sw
+      }
+      i1 = sw
+      j1 += sh
+    }
+
     var i: Float = x+sw
-    while(i < x+w-sw) {
-      batch.draw(UIButton.southEdge, i, y, z, sw, sh)
-      batch.draw(UIButton.northEdge, i, y+h-sh, z, sw, sh)
+    while(i <= x+w-sw) {
+      batch.draw(ButtonTextures.southEdge, i, y, z, sw, sh)
+      batch.draw(ButtonTextures.northEdge, i, y+h-sh, z, sw, sh)
       i+=sw
     }
 
     var j: Float = y+sh
-    while(j < y+h-sh) {
-      batch.draw(UIButton.westEdge, x, j, z, sw, sh)
-      batch.draw(UIButton.eastEdge, x+w-sw, j, z, sw, sh)
+    while(j <= y+h-sh) {
+      batch.draw(ButtonTextures.westEdge, x, j, z, sw, sh)
+      batch.draw(ButtonTextures.eastEdge, x+w-sw, j, z, sw, sh)
       j+=sh
     }
+
+    batch.draw(ButtonTextures.bottomLeftCorner, x, y, z, sw, sh)
+    batch.draw(ButtonTextures.bottomRightCorner, x+w-sw, y, z, sw, sh)
+    batch.draw(ButtonTextures.topLeftCorner, x, y+h-sh, z, sw, sh)
+    batch.draw(ButtonTextures.topRightCorner, x+w-sw, y+h-sh, z, sw, sh)
     batch.end()
   }
 

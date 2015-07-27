@@ -134,7 +134,7 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
         }
         catch {
           case e: Exception => {
-            PhiEngine.getInstance().error("Unable to find icon: /" + loc.getPath)
+            PhiEngine.getInstance().getLogger().error("Unable to find icon: /" + loc.getPath)
             img = nullImage
           }
         }

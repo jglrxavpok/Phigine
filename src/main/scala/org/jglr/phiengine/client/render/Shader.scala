@@ -38,7 +38,7 @@ class Shader(shader: FilePointer) {
   glAttachShader(id, fragID)
   glLinkProgram(id)
   if (glGetProgrami(id, GL_LINK_STATUS) == 0) {
-    PhiEngine.getInstance().error("Failed to link shader \n" + glGetProgramInfoLog(id))
+    PhiEngine.getInstance().getLogger().error("Failed to link shader \n" + glGetProgramInfoLog(id))
   }
 
   def bind() {
@@ -74,7 +74,7 @@ class Shader(shader: FilePointer) {
     glShaderSource(id, source)
     glCompileShader(id)
     if (glGetShaderi(id, GL_COMPILE_STATUS) == 0) {
-      PhiEngine.getInstance().error("Failed to load shader " + file + "\n" + glGetShaderInfoLog(id))
+      PhiEngine.getInstance().getLogger().error("Failed to load shader " + file + "\n" + glGetShaderInfoLog(id))
     }
     id
   }
@@ -115,7 +115,7 @@ class Shader(shader: FilePointer) {
         } else if (command.startsWith("include ")) {
           val arg: String = command.substring("include ".length)
           val toInclude: FilePointer = path.relative(arg)
-          PhiEngine.getInstance().info("Including shader file "+toInclude+" inside "+path)
+          PhiEngine.getInstance().getLogger().info("Including shader file "+toInclude+" inside "+path)
           val content: String = preprocess(toInclude.strReadAll)
           builder.append(content)
         }
@@ -165,7 +165,7 @@ class Shader(shader: FilePointer) {
     }
     else {
       loc = glGetUniformLocation(id, name)
-      if (loc == -1) PhiEngine.getInstance().error("Uniform with name '" + name + "' not found")
+      if (loc == -1) PhiEngine.getInstance().getLogger().error("Uniform with name '" + name + "' not found")
       locations.put(name, loc)
     }
     loc

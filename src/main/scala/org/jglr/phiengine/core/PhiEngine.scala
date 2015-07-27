@@ -245,18 +245,6 @@ class PhiEngine extends IDisposable {
     glfwTerminate()
   }
 
-  def error(s: String) {
-    logger.error(s)
-  }
-
-  def info(s: String) {
-    logger.info(s)
-  }
-
-  def debug(s: String) {
-    logger.debug(s)
-  }
-
   def getLogger(): Logger = {
     logger
   }
@@ -264,7 +252,7 @@ class PhiEngine extends IDisposable {
   def checkGLError(location: String) {
     val glError: Int = glGetError
     if (glError != GL_NO_ERROR) {
-      error("OpenGL Error: " + GLContext.translateGLErrorString(glError) + " at " + location)
+      logger.error("OpenGL Error: " + GLContext.translateGLErrorString(glError) + " at " + location)
     }
   }
 
@@ -315,7 +303,7 @@ class PhiEngine extends IDisposable {
   }
 
   def setIcon(icon: FilePointer) {
-    error("Icons are not yet supported.")
+    getLogger().error("Icons are not yet supported.")
   }
 
   def getNetworkHandler(): NetworkHandler = {

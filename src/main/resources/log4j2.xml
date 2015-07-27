@@ -2,7 +2,7 @@
 <Configuration status="WARN">
     <Appenders>
         <Console name="SysOut" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%d{HH:mm:ss}] [%logger:%t/%level] [%class{1}.java->%method:%line] %msg%n" />
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%logger:%t/%level] [%F->%method:%line] %msg%n" />
         </Console>
     </Appenders>
     <Loggers>

@@ -5,12 +5,12 @@ import java.util.{List, ArrayList}
 import org.jglr.phiengine.client.render.{TextureRegion, TextureMapSprite, TextureMap, Texture}
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
-import org.jglr.phiengine.client.ui.components.UIButton
+import org.jglr.phiengine.client.ui.components.{ButtonTextures, UIButton}
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.FilePointer
 
 object UITextures extends TextureMap(new FilePointer("assets/textures/ui/")) {
-  UIButton.genTextures()
+  ButtonTextures.genTextures()
   compile
   writeDebugTexture()
 }

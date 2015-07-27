@@ -29,7 +29,7 @@ class Texture(pointer: FilePointer, _img: BufferedImage = null) extends Referenc
       catch {
         case e: Exception =>
           e.printStackTrace()
-          PhiEngine.getInstance().error("Could not find texture " + pointer + ", loading placeholder texture instead!")
+          PhiEngine.getInstance().getLogger().error("Could not find texture " + pointer + ", loading placeholder texture instead!")
           new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB)
       }
     }
