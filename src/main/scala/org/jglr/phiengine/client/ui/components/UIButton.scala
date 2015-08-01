@@ -1,32 +1,45 @@
 package org.jglr.phiengine.client.ui.components
 
-import org.jglr.phiengine.client.render.TextureRegion
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.FontRenderer
-import org.jglr.phiengine.client.ui.{UITextures, UIComponent}
+import org.jglr.phiengine.client.ui.{ComponentState, ComponentTextures, UIComponent}
 import org.jglr.phiengine.client.ui.layouts.RelativeLayout
 
-object ButtonTextures {
-  var topLeftCorner: TextureRegion = null
-  var bottomLeftCorner: TextureRegion = null
-  var topRightCorner: TextureRegion = null
-  var bottomRightCorner: TextureRegion = null
-  var northEdge: TextureRegion = null
-  var eastEdge: TextureRegion = null
-  var westEdge: TextureRegion = null
-  var southEdge: TextureRegion = null
-  var center: TextureRegion = null
+object ButtonTextures extends ComponentTextures("button_") {
 
-  def genTextures() = {
-    topLeftCorner = UITextures.generateIcon("button_tleft")
-    bottomLeftCorner = UITextures.generateIcon("button_bleft")
-    topRightCorner = UITextures.generateIcon("button_tright")
-    bottomRightCorner = UITextures.generateIcon("button_bright")
-    northEdge = UITextures.generateIcon("button_north")
-    eastEdge = UITextures.generateIcon("button_east")
-    westEdge = UITextures.generateIcon("button_west")
-    southEdge = UITextures.generateIcon("button_south")
-    center = UITextures.generateIcon("button_center")
+  def genTextures(): Unit = {
+    // register idle textures
+    register("tleft", ComponentState.IDLE)
+    register("bleft", ComponentState.IDLE)
+    register("tright", ComponentState.IDLE)
+    register("bright", ComponentState.IDLE)
+    register("north", ComponentState.IDLE)
+    register("east", ComponentState.IDLE)
+    register("west", ComponentState.IDLE)
+    register("south", ComponentState.IDLE)
+    register("center", ComponentState.IDLE)
+
+    // register focused textures
+    register("tleft", ComponentState.FOCUSED, "_focused")
+    register("bleft", ComponentState.FOCUSED, "_focused")
+    register("tright", ComponentState.FOCUSED, "_focused")
+    register("bright", ComponentState.FOCUSED, "_focused")
+    register("north", ComponentState.FOCUSED, "_focused")
+    register("east", ComponentState.FOCUSED, "_focused")
+    register("west", ComponentState.FOCUSED, "_focused")
+    register("south", ComponentState.FOCUSED, "_focused")
+    register("center", ComponentState.FOCUSED, "_focused")
+
+    // register hovered textures
+    register("tleft", ComponentState.HOVERED, "_hovered")
+    register("bleft", ComponentState.HOVERED, "_hovered")
+    register("tright", ComponentState.HOVERED, "_hovered")
+    register("bright", ComponentState.HOVERED, "_hovered")
+    register("north", ComponentState.HOVERED, "_hovered")
+    register("east", ComponentState.HOVERED, "_hovered")
+    register("west", ComponentState.HOVERED, "_hovered")
+    register("south", ComponentState.HOVERED, "_hovered")
+    register("center", ComponentState.HOVERED, "_hovered")
   }
 
 }
@@ -44,12 +57,13 @@ class UIButton(fontRenderer: FontRenderer, text: String = null) extends UICompon
     val sw = 8f
     val sh = 8f
     batch.begin()
+    val state = ComponentState.FOCUSED // TODO: Changed based on real state
 
     var i1: Float = sw
     var j1: Float = sh
     while(j1 < h-sh) {
       while(i1 < w-sw) {
-        batch.draw(ButtonTextures.center, x+i1, y+j1, z, sw, sh)
+        batch.draw(ButtonTextures.get("center", state), x+i1, y+j1, z, sw, sh)
         i1 += sw
       }
       i1 = sw
@@ -58,22 +72,22 @@ class UIButton(fontRenderer: FontRenderer, text: String = null) extends UICompon
 
     var i: Float = x+sw
     while(i <= x+w-sw) {
-      batch.draw(ButtonTextures.southEdge, i, y, z, sw, sh)
-      batch.draw(ButtonTextures.northEdge, i, y+h-sh, z, sw, sh)
+      batch.draw(ButtonTextures.get("south", state), i, y, z, sw, sh)
+      batch.draw(ButtonTextures.get("north", state), i, y+h-sh, z, sw, sh)
       i+=sw
     }
 
     var j: Float = y+sh
     while(j <= y+h-sh) {
-      batch.draw(ButtonTextures.westEdge, x, j, z, sw, sh)
-      batch.draw(ButtonTextures.eastEdge, x+w-sw, j, z, sw, sh)
+      batch.draw(ButtonTextures.get("west", state), x, j, z, sw, sh)
+      batch.draw(ButtonTextures.get("east", state), x+w-sw, j, z, sw, sh)
       j+=sh
     }
 
-    batch.draw(ButtonTextures.bottomLeftCorner, x, y, z, sw, sh)
-    batch.draw(ButtonTextures.bottomRightCorner, x+w-sw, y, z, sw, sh)
-    batch.draw(ButtonTextures.topLeftCorner, x, y+h-sh, z, sw, sh)
-    batch.draw(ButtonTextures.topRightCorner, x+w-sw, y+h-sh, z, sw, sh)
+    batch.draw(ButtonTextures.get("bleft", state), x, y, z, sw, sh)
+    batch.draw(ButtonTextures.get("bright", state), x+w-sw, y, z, sw, sh)
+    batch.draw(ButtonTextures.get("tleft", state), x, y+h-sh, z, sw, sh)
+    batch.draw(ButtonTextures.get("tright", state), x+w-sw, y+h-sh, z, sw, sh)
     batch.end()
   }
 

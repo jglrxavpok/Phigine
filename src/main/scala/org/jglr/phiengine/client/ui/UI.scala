@@ -2,6 +2,7 @@ package org.jglr.phiengine.client.ui
 
 import java.util.{List, ArrayList}
 
+import org.jglr.phiengine.client.input.InputProcessor
 import org.jglr.phiengine.client.render.{TextureRegion, TextureMapSprite, TextureMap, Texture}
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.{FontRenderer, Font}

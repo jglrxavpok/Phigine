@@ -1,12 +1,41 @@
 package org.jglr.phiengine.client.ui
 
-import java.util.{ArrayList, List}
+import java.util.{Map, HashMap, ArrayList, List}
 
+import org.jglr.phiengine.client.render.TextureRegion
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
 import org.jglr.phiengine.core.maths.Vec2
 import org.jglr.phiengine.core.utils.JavaConversions._
 import scala.collection.JavaConversions._
+
+object ComponentState extends Enumeration {
+  type Type = Value
+  val IDLE, HOVERED, FOCUSED = Value
+}
+
+abstract class ComponentTextures(val prefix: String) {
+  val texMap = new HashMap[ComponentState.Type, Map[String, TextureRegion]]
+
+  def genTextures(): Unit
+
+  protected def register(name: String, state: ComponentState.Type, suffix: String = ""): TextureRegion = {
+    if(!texMap.containsKey(state)) {
+      texMap.put(state, new HashMap[String, TextureRegion])
+    }
+    val generated = UITextures.generateIcon(prefix+name+suffix)
+    texMap.get(state).put(name, generated)
+  }
+
+  def get(name: String, state: ComponentState.Type): TextureRegion = {
+    val res = texMap.get(state).get(name)
+    if(res == null || res.isNull) {
+      texMap.get(ComponentState.IDLE).get(name)
+    } else {
+      res
+    }
+  }
+}
 
 abstract class UIComponent(fontRenderer: FontRenderer) {
 
