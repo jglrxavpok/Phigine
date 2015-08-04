@@ -26,7 +26,7 @@ class WindowPointer(val pointer: Long) {
   }
 
   def pollEvents {
-    glfwPollEvents
+    glfwPollEvents()
   }
 
   def getPointer: Long = pointer

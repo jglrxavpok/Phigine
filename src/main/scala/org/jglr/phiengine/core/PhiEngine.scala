@@ -105,12 +105,12 @@ class PhiEngine extends IDisposable {
 
   private var logger: Logger = null
 
+  var timer: Timer = null
   private var tickableRegistry: Registry[String, ITickable] = null
   private var game: Game = null
   private var displayWidth: Int = 0
   private var displayHeight: Int = 0
   private var window: WindowPointer = null
-  private var timer: Timer = null
   private var running: Boolean = false
   private var inputHandler: InputHandler = null
   private var inputQueue: InputProcessorQueue = null

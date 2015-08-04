@@ -64,5 +64,7 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
     batch.end()
     lvlRenderer.render(delta)
     ui.render(delta)
+    font.renderString(engine.timer.getUPS + " UPS", 0, engine.getDisplayHeight()-font.font.getHeight('A')*2, 0,Colors.niceWhite)
+    font.renderString(engine.timer.getFPS + " FPS", 0, engine.getDisplayHeight()-font.font.getHeight('A'), 0,Colors.niceWhite)
   }
 }
