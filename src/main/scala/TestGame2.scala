@@ -49,7 +49,7 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
     val layout = new FlowLayout(ui, 5f, 5f, FlowLayout.CENTER)
     ui.layout = layout
     ui.addChild(new UILabel(font, s"Hi there, I'm a test string created from a TrueType font (${font.font.getName()})! :D"))
-    for (i <- 0 to 10) {
+    for (i <- 0 to 15) {
       ui.addChild(new UILabel(font, s"Hi there, I'm the test string number #${i+1}"))
     }
     ui.addChild(new UIButton(font, s"Hi there, I'm a button"))

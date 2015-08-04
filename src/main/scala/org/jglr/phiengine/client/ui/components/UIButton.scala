@@ -8,38 +8,13 @@ import org.jglr.phiengine.client.ui.layouts.RelativeLayout
 object ButtonTextures extends ComponentTextures("button_") {
 
   def genTextures(): Unit = {
-    // register idle textures
-    register("tleft", ComponentState.IDLE)
-    register("bleft", ComponentState.IDLE)
-    register("tright", ComponentState.IDLE)
-    register("bright", ComponentState.IDLE)
-    register("north", ComponentState.IDLE)
-    register("east", ComponentState.IDLE)
-    register("west", ComponentState.IDLE)
-    register("south", ComponentState.IDLE)
-    register("center", ComponentState.IDLE)
-
-    // register focused textures
-    register("tleft", ComponentState.FOCUSED, "_focused")
-    register("bleft", ComponentState.FOCUSED, "_focused")
-    register("tright", ComponentState.FOCUSED, "_focused")
-    register("bright", ComponentState.FOCUSED, "_focused")
-    register("north", ComponentState.FOCUSED, "_focused")
-    register("east", ComponentState.FOCUSED, "_focused")
-    register("west", ComponentState.FOCUSED, "_focused")
-    register("south", ComponentState.FOCUSED, "_focused")
-    register("center", ComponentState.FOCUSED, "_focused")
-
-    // register hovered textures
-    register("tleft", ComponentState.HOVERED, "_hovered")
-    register("bleft", ComponentState.HOVERED, "_hovered")
-    register("tright", ComponentState.HOVERED, "_hovered")
-    register("bright", ComponentState.HOVERED, "_hovered")
-    register("north", ComponentState.HOVERED, "_hovered")
-    register("east", ComponentState.HOVERED, "_hovered")
-    register("west", ComponentState.HOVERED, "_hovered")
-    register("south", ComponentState.HOVERED, "_hovered")
-    register("center", ComponentState.HOVERED, "_hovered")
+    val texts = Array("tleft", "bleft", "tright", "bright", "north", "east", "west", "south", "center")
+    val states = Array((ComponentState.IDLE, ""), (ComponentState.FOCUSED, "_focused"), (ComponentState.HOVERED, "_hovered"))
+    for(text <- texts) {
+      for(state <- states) {
+        register(text, state._1, state._2)
+      }
+    }
   }
 
 }
@@ -57,7 +32,7 @@ class UIButton(fontRenderer: FontRenderer, text: String = null) extends UICompon
     val sw = 8f
     val sh = 8f
     batch.begin()
-    val state = ComponentState.FOCUSED // TODO: Changed based on real state
+    val state = ComponentState.HOVERED // TODO: Changed based on real state
 
     var i1: Float = sw
     var j1: Float = sh
