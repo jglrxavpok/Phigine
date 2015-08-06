@@ -1,8 +1,5 @@
 package org.jglr.phiengine.client.render
 
-import java.time.temporal.TemporalAmount
-import javax.print.attribute.standard.MediaSize.Other
-
 import org.jglr.phiengine.core.maths.Vec3
 
 object ColorModel extends Enumeration {

@@ -9,18 +9,19 @@ object SystemUtils {
   def getOS: OperatingSystem.Type = {
     val os: String = System.getProperty("os.name").toLowerCase
     if (os.contains("win")) {
-      return OperatingSystem.WINDOWS
+      OperatingSystem.WINDOWS
     }
     else if (os.contains("sunos") || os.contains("solaris")) {
-      return OperatingSystem.SOLARIS
+      OperatingSystem.SOLARIS
     }
     else if (os.contains("unix") || os.contains("linux")) {
-      return OperatingSystem.LINUX
+      OperatingSystem.LINUX
     }
     else if (os.contains("mac")) {
-      return OperatingSystem.MACOSX
+      OperatingSystem.MACOSX
+    } else {
+      OperatingSystem.UNKNOWN
     }
-    OperatingSystem.UNKNOWN
   }
 
   def getUserName: String = {
@@ -40,11 +41,11 @@ object SystemUtils {
     baseFolder
   }
 
-  def deleteRecursivly(file: File) {
+  def deleteRecursively(file: File) {
     if (file.isDirectory) {
       val list: Array[File] = file.listFiles
       if (list != null) for (f <- list) {
-        deleteRecursivly(f)
+        deleteRecursively(f)
         f.delete
       }
     }

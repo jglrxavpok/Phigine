@@ -25,9 +25,9 @@ class TexturePointer(file: FilePointer) extends IDisposable {
     texture = new Texture(file)
     TexturePointer.cache.put(file, texture)
   }
-  texture.incRefCount
+  texture.incRefCount()
 
-  def bind {
+  def bind() {
     bind(0)
   }
 
@@ -35,20 +35,20 @@ class TexturePointer(file: FilePointer) extends IDisposable {
     texture.bind(slot)
   }
 
-  def unbind {
-    texture.unbind
+  def unbind() {
+    texture.unbind()
   }
 
   def getHeight: Int = {
-    return texture.getHeight
+    texture.getHeight
   }
 
   def getWidth: Int = {
-    return texture.getWidth
+    texture.getWidth
   }
 
   def dispose {
-    texture.decRefCount
-    texture.dispose
+    texture.decRefCount()
+    texture.dispose()
   }
 }

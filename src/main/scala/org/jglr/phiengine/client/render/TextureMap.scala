@@ -112,7 +112,7 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
     sprite.icon = icon
     sprite.useRawImage = true
     registredSprites.add(sprite)
-    return icon
+    icon
   }
 
   /**
@@ -174,7 +174,7 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
    * Gets a texture icon from given name or null if none exists with given name
    */
   def get(name: String): TextureRegion = {
-    return get(new FilePointer(name))
+    get(new FilePointer(name))
   }
 
   /**
@@ -187,18 +187,18 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
         return sprite.icon
       }
     }
-    return TextureRegion.NULL
+    TextureRegion.NULL
   }
 
   def get(index: Int): TextureRegion = {
-    return registredSprites.get(index).icon
+    registredSprites.get(index).icon
   }
 
   /**
    * Returns generated texture
    */
   def getTexture: Texture = {
-    return texture
+    texture
   }
 
   /**
@@ -213,25 +213,25 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
    * Gets tile width
    */
   def getTileWidth: Int = {
-    return stitcher.getTileWidth
+    stitcher.getTileWidth
   }
 
   /**
    * Gets tile height
    */
   def getTileHeight: Int = {
-    return stitcher.getTileHeight
+    stitcher.getTileHeight
   }
 
   def generateIcon(loc: String): TextureRegion = {
-    return generateIcon(new FilePointer(loc + ".png"))
+    generateIcon(new FilePointer(loc + ".png"))
   }
 
   def bind(slot: Int = 0) {
     texture.bind(slot)
   }
 
-  def dispose {
+  def dispose() {
     texture.dispose()
   }
 
@@ -252,27 +252,27 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
     extends TextureRegion(minu, minv, maxu, maxv) {
 
     def getWidth: Float = {
-      return width
+      width
     }
 
     def getHeight: Float = {
-      return height
+      height
     }
 
     override def getMinU: Float = {
-      return minu
+      minu
     }
 
     override def getMaxU: Float = {
-      return maxu
+      maxu
     }
 
     override def getMinV: Float = {
-      return minv
+      minv
     }
 
     override def getMaxV: Float = {
-      return maxv
+      maxv
     }
 
     def setMinU(minu: Float) {

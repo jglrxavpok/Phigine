@@ -23,19 +23,19 @@ class InputProcessorQueue(inputHandler: InputHandler) extends InputProcessor {
   override def onKeyPressed(keycode: Int): Boolean = {
     queue.add(InputProcessorQueue.KEY_PRESS)
     queue.add(keycode)
-    return true
+    true
   }
 
   override def onKeyReleased(keycode: Int): Boolean = {
     queue.add(InputProcessorQueue.KEY_RELEASE)
     queue.add(keycode)
-    return false
+    false
   }
 
   override def onKeyTyped(character: Char): Boolean = {
     queue.add(InputProcessorQueue.KEY_TYPED)
     queue.add(character.toInt)
-    return false
+    false
   }
 
   override def onMousePressed(screenX: Int, screenY: Int, button: Int): Boolean = {
@@ -43,7 +43,7 @@ class InputProcessorQueue(inputHandler: InputHandler) extends InputProcessor {
     queue.add(screenX)
     queue.add(screenY)
     queue.add(button)
-    return false
+    false
   }
 
   override def onMouseReleased(screenX: Int, screenY: Int, button: Int): Boolean = {
@@ -51,20 +51,20 @@ class InputProcessorQueue(inputHandler: InputHandler) extends InputProcessor {
     queue.add(screenX)
     queue.add(screenY)
     queue.add(button)
-    return false
+    false
   }
 
   override def onMouseMoved(screenX: Int, screenY: Int): Boolean = {
     queue.add(InputProcessorQueue.MOUSE_MOVED)
     queue.add(screenX)
     queue.add(screenY)
-    return false
+    false
   }
 
   override def onScroll(dir: Int): Boolean = {
     queue.add(InputProcessorQueue.SCROLL)
     queue.add(dir)
-    return false
+    false
   }
 
   def addReceiver(receiver: InputProcessor) {

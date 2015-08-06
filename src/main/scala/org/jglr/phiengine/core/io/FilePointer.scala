@@ -64,11 +64,13 @@ class FilePointer(val _path: String, val fileType: FileType.Type = FileType.CLAS
   }
 
   override def equals(o: Any): Boolean = {
-    if (o.isInstanceOf[FilePointer]) {
-      val other: FilePointer = o.asInstanceOf[FilePointer]
-      return (other.getPath == path) && other.getType == fileType
+    o match {
+      case other: FilePointer =>
+        (other.getPath == path) && other.getType == fileType
+
+      case _ =>
+        false
     }
-    false
   }
 
   def child(child: String): FilePointer = {
@@ -90,11 +92,11 @@ class FilePointer(val _path: String, val fileType: FileType.Type = FileType.CLAS
   def exists: Boolean = {
     fileType match {
       case FileType.CLASSPATH =>
-        return classOf[FilePointer].getResourceAsStream("/" + path) != null
+        classOf[FilePointer].getResourceAsStream("/" + path) != null
       case FileType.DISK =>
-        return new File(path).exists
+        new File(path).exists
       case FileType.VIRTUAL =>
-        return true
+        true
       case _ =>
         throw new UnsupportedOperationException("Unknown type: " + getType)
     }

@@ -20,49 +20,49 @@ class InputHandler(val engine: PhiEngine) extends InputProcessor {
         return true
       }
     }
-    return false
+    false
   }
 
   def onKeyPressed(keycode: Int): Boolean = {
-    return update(keycode, keys, 1f, true)
+    update(keycode, keys, 1f, true)
   }
 
   def onKeyReleased(keycode: Int): Boolean = {
-    return update(keycode, keys, 0f, false)
+    update(keycode, keys, 0f, false)
   }
 
   def onKeyTyped(character: Char): Boolean = {
-    return false
+    false
   }
 
   def onMousePressed(screenX: Int, screenY: Int, button: Int): Boolean = {
-    return update(button, mouseButtons, 1f, true)
+    update(button, mouseButtons, 1f, true)
   }
 
   def onMouseReleased(screenX: Int, screenY: Int, button: Int): Boolean = {
-    return update(button, mouseButtons, 0f, false)
+    update(button, mouseButtons, 0f, false)
   }
 
   def onMouseMoved(screenX: Int, screenY: Int): Boolean = {
     var result: Boolean = update(Input.MOUSE_MOVE_X, mouseButtons, screenX, false)
     result |= update(Input.MOUSE_MOVE_Y, mouseButtons, screenY, false)
-    return result
+    result
   }
 
   def onScroll(dir: Int): Boolean = {
-    return false
+    false
   }
 
   def getKeys: List[Input] = {
-    return keys
+    keys
   }
 
   def getMouseButtons: List[Input] = {
-    return mouseButtons
+    mouseButtons
   }
 
   def getMouseMoveListeners: List[Input] = {
-    return mouseMoveListeners
+    mouseMoveListeners
   }
 
   def createMouseMoveListener(id: Int, name: String): Input = {

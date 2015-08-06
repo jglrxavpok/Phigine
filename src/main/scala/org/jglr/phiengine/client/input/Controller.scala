@@ -1,14 +1,10 @@
 package org.jglr.phiengine.client.input
 
-import java.util
-
-import com.google.common.collect.Maps
 import org.lwjgl.opengl.GL11
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.util.{Map, HashMap}
 import org.lwjgl.glfw.GLFW._
-import scala.collection.JavaConversions._
 
 class Controller(val id: Int = 0) {
   private final val buttons: Map[Int, Boolean] = new HashMap[Int, Boolean]
@@ -69,18 +65,18 @@ class Controller(val id: Int = 0) {
 
   def getAxisValue(axisIndex: Int): Float = {
     if (axes.containsKey(axisIndex)) return axes.get(axisIndex)
-    return 0f
+    0f
   }
 
   private def fireAxisMoved(axisIndex: Int, value: Float) {
     if (listener != null) listener.onAxisMoved(this, axisIndex, value)
   }
 
-  private def fireConnected {
+  private def fireConnected() {
     if (listener != null) listener.onConnection(this)
   }
 
-  private def fireDisconnected {
+  private def fireDisconnected() {
     if (listener != null) listener.onDisconnection(this)
   }
 
@@ -93,18 +89,18 @@ class Controller(val id: Int = 0) {
   }
 
   def isButtonPressed(button: Int): Boolean = {
-    return buttons.containsKey(button) && buttons.get(button)
+    buttons.containsKey(button) && buttons.get(button)
   }
 
   def isConnected: Boolean = {
-    return connected
+    connected
   }
 
   def getName: String = {
-    return name
+    name
   }
 
   def getID: Int = {
-    return id
+    id
   }
 }

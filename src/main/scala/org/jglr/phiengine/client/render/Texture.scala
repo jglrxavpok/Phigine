@@ -68,11 +68,11 @@ class Texture(pointer: FilePointer, _img: BufferedImage = null) extends Referenc
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer)
   unbind()
 
-  def getWidth: Int = {
+  def getWidth(): Int = {
     w
   }
 
-  def getHeight: Int = {
+  def getHeight(): Int = {
     h
   }
 

@@ -24,7 +24,7 @@ class ControllerHandler(val engine: PhiEngine) extends ControllerListener {
   }
 
   def onButtonPressed(controller: Controller, buttonCode: Int): Boolean = {
-    return update(controller, buttonCode, buttons, 1f, true)
+    update(controller, buttonCode, buttons, 1f, true)
   }
 
   private def update(controller: Controller, id: Int, list: List[Input], value: Float, isPressed: Boolean): Boolean = {
@@ -35,22 +35,22 @@ class ControllerHandler(val engine: PhiEngine) extends ControllerListener {
         return true
       }
     }
-    return false
+    false
   }
 
   def onButtonReleased(controller: Controller, buttonCode: Int): Boolean = {
-    return update(controller, buttonCode, buttons, 0f, false)
+    update(controller, buttonCode, buttons, 0f, false)
   }
 
   def onAxisMoved(controller: Controller, axisCode: Int, value: Float): Boolean = {
-    return update(controller, axisCode, axises, value, false)
+    update(controller, axisCode, axises, value, false)
   }
 
   def onPovMoved(controller: Controller, povCode: Int, value: PovDirection.Type): Boolean = {
-    return false
+    false
   }
 
-  def poll {
+  def poll() {
     controllers.foreach(c => c.poll())
   }
 
@@ -60,19 +60,19 @@ class ControllerHandler(val engine: PhiEngine) extends ControllerListener {
   }
 
   def getController(id: Int): Controller = {
-    return controllers.stream.filter((c: Controller) => c.getID == id).findFirst.get
+    controllers.stream.filter((c: Controller) => c.getID == id).findFirst.get
   }
 
   def getAxises: List[Input] = {
-    return axises
+    axises
   }
 
   def getPovs: List[Input] = {
-    return povs
+    povs
   }
 
   def getButtons: List[Input] = {
-    return buttons
+    buttons
   }
 
   def getAxis(controller: Controller, name: String): Input = {
@@ -80,32 +80,32 @@ class ControllerHandler(val engine: PhiEngine) extends ControllerListener {
     for (axis <- axises) {
       if ((name == axis.getName) && axis.getController == controller) return axis
     }
-    return null
+    null
   }
 
   def getAxis(controller: Controller, id: Int): Input = {
     for (axis <- axises) {
       if (id == axis.getId && axis.getController == controller) return axis
     }
-    return null
+    null
   }
 
   def addButton(controller: Controller, id: Int, name: String): Input = {
     val button: Input = new Input(id, controller, name, Input.Type.GAMEPAD_BUTTON)
     buttons.add(button)
-    return button
+    button
   }
 
   def addAxis(controller: Controller, id: Int, name: String): Input = {
     val axis: Input = new Input(id, controller, name, Input.Type.AXIS)
     axises.add(axis)
-    return axis
+    axis
   }
 
   def addPov(controller: Controller, id: Int, name: String): Input = {
     val pov: Input = new Input(id, controller, name, Input.Type.POV)
     povs.add(pov)
-    return pov
+    pov
   }
 
   def addAxis(input: Input) {

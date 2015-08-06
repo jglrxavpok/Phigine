@@ -31,7 +31,7 @@ class Stitcher {
    * Adds a image to the list
    */
   def addImage(img: BufferedImage, name: String): Int = {
-    return addImage(img, name, false)
+    addImage(img, name, false)
   }
 
   /**
@@ -161,13 +161,13 @@ class Stitcher {
    * Gets tile width
    */
   def getTileWidth: Int = {
-    return tileWidth
+    tileWidth
   }
 
   /**
    * Gets tile height
    */
   def getTileHeight: Int = {
-    return tileHeight
+    tileHeight
   }
 }
