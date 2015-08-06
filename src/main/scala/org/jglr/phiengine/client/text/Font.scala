@@ -17,8 +17,9 @@ object FontFormat extends Enumeration {
 }
 
 object Font {
-  def get(name: String, size: Int, formats: FontFormat.Type*): Font = {
-    new Font(new JFont(name, getFormat(formats), size))
+
+  def get(name: String, size: Int, antialias: Boolean, formats: FontFormat.Type*): Font = {
+    new Font(new JFont(name, getFormat(formats), size), antialias)
   }
 
   def create(input: InputStream, formats: FontFormat.Type*): Font = {
@@ -47,7 +48,7 @@ object Font {
   }
 }
 
-class Font(javaFont: JFont) {
+class Font(javaFont: JFont, antialias: Boolean = true) {
 
   val tmpImg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
   val graph = tmpImg.createGraphics()
@@ -62,7 +63,7 @@ class Font(javaFont: JFont) {
       return null
     val result = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB)
     val g = result.createGraphics()
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, if(antialias) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF)
     g.setFont(javaFont)
     g.setColor(Color.white)
     g.drawString(String.valueOf(character), 0, metrics.getAscent)

@@ -19,7 +19,7 @@ object UITextures extends TextureMap(new FilePointer("assets/textures/ui/")) {
 class UI(var fontRenderer: FontRenderer = null) extends UIComponent(fontRenderer) {
 
   if(fontRenderer == null) {
-    fontRenderer = new FontRenderer(FontRenderer.ASCII, Font.get("Arial", 28))
+    fontRenderer = new FontRenderer(FontRenderer.ASCII, Font.get("Arial", 28, false))
   }
 
   val batch = new SpriteBatch()

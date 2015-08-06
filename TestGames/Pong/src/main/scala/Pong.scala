@@ -1,6 +1,7 @@
 import org.jglr.phiengine.client.input.Input
 import org.jglr.phiengine.client.render.{ColorModel, Texture, Colors}
 import org.jglr.phiengine.client.render.g2d.{ShapeMode, ShapeBatch, SpriteBatch}
+import org.jglr.phiengine.client.text.{Font, FontRenderer}
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.entity.Entity
 import org.jglr.phiengine.core.game.Game
@@ -38,6 +39,7 @@ class Pong(engine: PhiEngine) extends Game(engine) {
 
   val padW = 20
   val padH = 150
+  var font: FontRenderer = null
 
   override def getName: String = "Pong"
 
@@ -45,11 +47,11 @@ class Pong(engine: PhiEngine) extends Game(engine) {
     val posComp = player.getComponent(classOf[PositionComponent])
     val speed = 8
     if(up.isPressed) {
-      posComp.velocity(0, speed, 0)
+      posComp.velocity(0, -speed, 0)
     }
 
     if(down.isPressed) {
-      posComp.velocity(0, -speed, 0)
+      posComp.velocity(0, speed, 0)
     }
 
     if(!up.isPressed && !down.isPressed) {
@@ -96,6 +98,7 @@ class Pong(engine: PhiEngine) extends Game(engine) {
   }
 
   override def init(config: PhiConfig): Unit = {
+    font = new FontRenderer(FontRenderer.ASCII, Font.get("Consolas", 18, antialias = false))
     this.width = config.width
     this.height = config.height
 
@@ -169,6 +172,10 @@ class Pong(engine: PhiEngine) extends Game(engine) {
       shapeBatch.circle(width/2, height/2-50, 0, 25f-i/2f, segs, Colors.niceWhite)
 
     shapeBatch.end()
+
+    font.renderString(engine.timer.getUPS + " UPS", 0, engine.getDisplayHeight()-font.font.getHeight('A')*2, 0,Colors.niceWhite)
+    font.renderString(engine.timer.getFPS + " FPS", 0, engine.getDisplayHeight()-font.font.getHeight('A'), 0,Colors.niceWhite)
+
   }
 
   def renderEntity(paddle: Entity, delta: Float) = {

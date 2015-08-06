@@ -21,7 +21,7 @@ class FontRenderer(val supportedChars: Array[Char], _font: Font = null) {
 
   val font =
     if(_font == null) {
-      Font.get("Arial", 28)
+      Font.get("Arial", 28, false)
     }
     else {
       _font
@@ -37,6 +37,7 @@ class FontRenderer(val supportedChars: Array[Char], _font: Font = null) {
       map.generateIcon(""+c.toInt)
   }
   map.compile
+  map.writeDebugTexture()
 
   def drawChar(c: Char, posX: Float, posY: Float, z: Float, batch: SpriteBatch, color: Color, scale: Float = 1f): Boolean = {
     val index = indexOf(c)

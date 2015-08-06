@@ -26,8 +26,8 @@ sourceSets {
 
 dependencies {
     compile 'org.scala-lang:scala-library:2.11.7'
-    compile 'org.lwjgl.lwjgl:lwjgl:3.0.0a'
-    compile 'org.lwjgl.lwjgl:lwjgl-natives:3.0.0a'
+    compile 'org.lwjgl:lwjgl:3.0.0a'
+    compile 'org.lwjgl:lwjgl-natives:3.0.0a'
     compile "io.netty:netty-all:4.0.28.Final"
     compile 'com.google.guava:guava:18.0'
     compile 'com.google.code.gson:gson:2.3.1'
