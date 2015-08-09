@@ -45,7 +45,7 @@ class FontRenderer(val supportedChars: Array[Char], _font: Font = null) {
       val region = map.get(index)
       val w = map.getWidth()*(region.getMaxU-region.getMinU)
       val h = map.getHeight()*(region.getMaxV-region.getMinV)
-      batch.draw(region, posX, posY-h, z, w, h)
+      batch.draw(region, posX, posY-h, z, w, h, color)
       true
     } else {
       false

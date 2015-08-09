@@ -23,14 +23,18 @@ class UILabel(fontRenderer: FontRenderer, _text: String = "") extends UIComponen
     text = newText
   }
 
+  def getText(): String = text
+
   override def renderSelf(delta: Float, batch: SpriteBatch) = {
     fontRenderer.renderString(text, x, y, z, color, scale)
   }
 
   override def pack(): Unit = {
-    w = fontRenderer.font.getWidth(text)
-    h = fontRenderer.font.getHeight(text)
+    w = fontRenderer.font.getWidth(text)*scale
+    h = fontRenderer.font.getHeight(text)*scale
   }
 
   pack()
+
+  override def toString(): String = s"UILabel($text)"
 }

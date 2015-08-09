@@ -6,6 +6,20 @@ import java.nio.FloatBuffer
 import java.util.{Map, HashMap}
 import org.lwjgl.glfw.GLFW._
 
+object Controllers {
+  def findFirstID(start: Int = 0): Int = {
+    var id = start
+    var found = false
+    while(id <= GLFW_JOYSTICK_LAST && !found) {
+      found = glfwJoystickPresent(id) == GL11.GL_TRUE
+      id+=1
+    }
+    if(!found)
+      id = -1
+    id-1
+  }
+}
+
 class Controller(val id: Int = 0) {
   private final val buttons: Map[Int, Boolean] = new HashMap[Int, Boolean]
   private final val axes: Map[Int, Float] = new HashMap[Int, Float]
@@ -26,16 +40,16 @@ class Controller(val id: Int = 0) {
   }
 
   def poll() {
-    val wasConnected: Boolean = isConnected
+    val wasConnected: Boolean = connected
     connected = glfwJoystickPresent(id) == GL11.GL_TRUE
     if (connected) name = glfwGetJoystickName(id)
-    if (!wasConnected && isConnected) {
-      fireConnected
+    if (!wasConnected && connected) {
+      fireConnected()
     }
-    else if (wasConnected && !isConnected) {
-      fireDisconnected
+    else if (wasConnected && !connected) {
+      fireDisconnected()
     }
-    if (!isConnected) {
+    if (!connected) {
       return
     }
     val buttons: ByteBuffer = glfwGetJoystickButtons(id)
@@ -103,4 +117,5 @@ class Controller(val id: Int = 0) {
   def getID: Int = {
     id
   }
+
 }

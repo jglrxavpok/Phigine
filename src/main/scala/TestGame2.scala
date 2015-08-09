@@ -1,3 +1,4 @@
+import org.jglr.phiengine.client.input.{Input, ControllerHandler, Controllers, Controller}
 import org.jglr.phiengine.client.render.{Colors, LevelRenderer, Texture}
 import org.jglr.phiengine.client.render.g2d.{Sprite, SpriteBatch}
 import org.jglr.phiengine.client.text.{FontFormat, FontRenderer, Font}
@@ -11,6 +12,7 @@ import org.jglr.phiengine.core.io.FilePointer
 import org.jglr.phiengine.core.level.{Level, PhysicsLevel}
 import org.jglr.phiengine.core.maths.Vec2
 import org.jglr.phiengine.core.utils.PhiConfig
+import org.lwjgl.glfw.GLFW
 
 class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
   var batch: SpriteBatch = null
@@ -22,6 +24,9 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
 
   override def update(delta: Float): Unit = {
     ui.update(delta)
+    if(testButton.isPressed) {
+      println(":D")
+    }
   }
 
   var sprite: Sprite = null
@@ -30,6 +35,10 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
   var lvlRenderer: LevelRenderer = null
   var font: FontRenderer = null
   var ui: UI = null
+  var controller: Controller = null
+  var controller2: Controller = null
+  var controllerHandler: ControllerHandler = null
+  var testButton: Input = null
 
   override def init(config: PhiConfig): Unit = {
     batch = new SpriteBatch
@@ -48,11 +57,25 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
     ui = new UI(font)
     val layout = new FlowLayout(ui, 5f, 5f, FlowLayout.CENTER)
     ui.layout = layout
-    ui.addChild(new UILabel(font, s"Hi there, I'm a test string created from a TrueType font (${font.font.getName()})! :D"))
-    for (i <- 0 to 15) {
-      ui.addChild(new UILabel(font, s"Hi there, I'm the test string number #${i+1}"))
+    val testPane = new TestPanel(font)
+    ui.addChild(testPane)
+
+    controllerHandler = new ControllerHandler(engine)
+    for(i <- 0 to GLFW.GLFW_JOYSTICK_LAST) {
+      println(i+": "+GLFW.glfwJoystickPresent(i))
     }
-    ui.addChild(new UIButton(font, s"Hi there, I'm a button"))
+    val id = Controllers.findFirstID()
+    println("found: "+id)
+    controller = new Controller(id)
+    controllerHandler.registerController(controller)
+    controller.setListener(testPane)
+
+    testButton = controllerHandler.addButton(controller, 2, "Test")
+
+  }
+
+  override def pollEvents(): Unit = {
+    controllerHandler.poll()
   }
 
   override def render(delta: Float): Unit = {

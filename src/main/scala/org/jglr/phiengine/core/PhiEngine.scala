@@ -180,6 +180,7 @@ class PhiEngine extends IDisposable {
     if (stopKey.isPressed) {
       running = false
     }
+    game.pollEvents()
   }
 
   private def render(alpha: Float) {
@@ -272,7 +273,7 @@ class PhiEngine extends IDisposable {
     window
   }
 
-  def addInputProcessor(proc: InputProcessor) {
+  def addInputListener(proc: InputListener) {
     inputQueue.addReceiver(proc)
   }
 

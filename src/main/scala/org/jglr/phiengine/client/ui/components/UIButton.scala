@@ -1,5 +1,7 @@
 package org.jglr.phiengine.client.ui.components
 
+import org.jglr.phiengine.client.input.{ButtonMappings, Controller}
+import org.jglr.phiengine.client.render.Colors
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.FontRenderer
 import org.jglr.phiengine.client.ui.{ComponentState, ComponentTextures, UIComponent}
@@ -21,50 +23,100 @@ object ButtonTextures extends ComponentTextures("button_") {
 
 class UIButton(fontRenderer: FontRenderer, text: String = null) extends UIComponent(fontRenderer) {
 
+  var drawBackground: Boolean = true
   layout = new RelativeLayout(this)
+  margins.x = 2.5f
+  margins.y = 2.5f
 
   if(text != null) {
-    addChild(new UILabel(fontRenderer, text))
+    val label = new UILabel(fontRenderer, text)
+    label.color = Colors.lightGray lighter()
+    addChild(label)
     pack()
   }
 
   override def renderSelf(delta: Float, batch: SpriteBatch): Unit = {
     val sw = 8f
     val sh = 8f
-    batch.begin()
-    val state = ComponentState.HOVERED // TODO: Changed based on real state
-
-    var i1: Float = sw
-    var j1: Float = sh
-    while(j1 < h-sh) {
-      while(i1 < w-sw) {
-        batch.draw(ButtonTextures.get("center", state), x+i1, y+j1, z, sw, sh)
-        i1 += sw
+    if(drawBackground) {
+      batch.begin()
+      var i1: Float = sw
+      var j1: Float = sh
+      while (j1 < h - sh) {
+        while (i1 < w - sw) {
+          batch.draw(ButtonTextures.get("center", state), x + i1, y + j1, z, sw, sh, Colors.white)
+          i1 += sw
+        }
+        i1 = sw
+        j1 += sh
       }
-      i1 = sw
-      j1 += sh
-    }
 
-    var i: Float = x+sw
-    while(i <= x+w-sw) {
-      batch.draw(ButtonTextures.get("south", state), i, y, z, sw, sh)
-      batch.draw(ButtonTextures.get("north", state), i, y+h-sh, z, sw, sh)
-      i+=sw
-    }
+      var i: Float = x + sw
+      while (i <= x + w - sw) {
+        batch.draw(ButtonTextures.get("south", state), i, y, z, sw, sh, Colors.white)
+        batch.draw(ButtonTextures.get("north", state), i, y + h - sh, z, sw, sh, Colors.white)
+        i += sw
+      }
 
-    var j: Float = y+sh
-    while(j <= y+h-sh) {
-      batch.draw(ButtonTextures.get("west", state), x, j, z, sw, sh)
-      batch.draw(ButtonTextures.get("east", state), x+w-sw, j, z, sw, sh)
-      j+=sh
-    }
+      var j: Float = y + sh
+      while (j <= y + h - sh) {
+        batch.draw(ButtonTextures.get("west", state), x, j, z, sw, sh, Colors.white)
+        batch.draw(ButtonTextures.get("east", state), x + w - sw, j, z, sw, sh, Colors.white)
+        j += sh
+      }
 
-    batch.draw(ButtonTextures.get("bleft", state), x, y, z, sw, sh)
-    batch.draw(ButtonTextures.get("bright", state), x+w-sw, y, z, sw, sh)
-    batch.draw(ButtonTextures.get("tleft", state), x, y+h-sh, z, sw, sh)
-    batch.draw(ButtonTextures.get("tright", state), x+w-sw, y+h-sh, z, sw, sh)
-    batch.end()
+      batch.draw(ButtonTextures.get("bleft", state), x, y, z, sw, sh, Colors.white)
+      batch.draw(ButtonTextures.get("bright", state), x + w - sw, y, z, sw, sh, Colors.white)
+      batch.draw(ButtonTextures.get("tleft", state), x, y + h - sh, z, sw, sh, Colors.white)
+      batch.draw(ButtonTextures.get("tright", state), x + w - sw, y + h - sh, z, sw, sh, Colors.white)
+      batch.end()
+    }
   }
 
   override def onMoved(): Unit = layout.recalculatePositions()
+
+  override def onMousePressed(screenX: Int, screenY: Int, button: Int): Boolean = {
+    if(!super.onMousePressed(screenX, screenY, button))
+      if(isMouseOn(screenX, screenY, x, y, w, h)) {
+        state = ComponentState.FOCUSED
+        return true
+      }
+    false
+  }
+
+  override def onMouseReleased(screenX: Int, screenY: Int, button: Int): Boolean = {
+    if(!super.onMouseReleased(screenX, screenY, button))
+      if(isMouseOn(screenX, screenY, x, y, w, h)) {
+        state = ComponentState.HOVERED
+        return true
+      }
+    false
+  }
+
+
+  override def onMouseMoved(screenX: Int, screenY: Int): Boolean = {
+    if(isMouseOn(screenX, screenY, x, y, w, h))
+      state = ComponentState.HOVERED
+    else
+      state = ComponentState.IDLE
+    super.onMouseMoved(screenX, screenY)
+  }
+
+  override def onButtonPressed(controller: Controller, buttonCode: Int): Boolean = {
+    if(buttonCode == ButtonMappings.confirm && state == ComponentState.HOVERED) {
+      state = ComponentState.FOCUSED
+      return true
+    }
+    super.onButtonPressed(controller, buttonCode)
+  }
+
+  override def onButtonReleased(controller: Controller, buttonCode: Int): Boolean = {
+    if(buttonCode == ButtonMappings.confirm && state == ComponentState.FOCUSED) {
+      state = ComponentState.HOVERED
+      return true
+    }
+    super.onButtonReleased(controller, buttonCode)
+  }
+
+  override def toString: String = s"UIButton(${super.toString})"
 }

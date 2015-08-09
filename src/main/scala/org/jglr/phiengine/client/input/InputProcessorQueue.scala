@@ -17,7 +17,7 @@ object InputProcessorQueue {
 }
 
 class InputProcessorQueue(inputHandler: InputHandler) extends InputProcessor {
-  private val receivers: List[InputProcessor] = Lists.newArrayList(inputHandler)
+  private val receivers: List[InputListener] = Lists.newArrayList(inputHandler)
   private val queue: List[Integer] = new ArrayList[Integer]
 
   override def onKeyPressed(keycode: Int): Boolean = {
@@ -67,7 +67,7 @@ class InputProcessorQueue(inputHandler: InputHandler) extends InputProcessor {
     false
   }
 
-  def addReceiver(receiver: InputProcessor) {
+  def addReceiver(receiver: InputListener) {
     receivers.add(receiver)
   }
 
@@ -77,42 +77,42 @@ class InputProcessorQueue(inputHandler: InputHandler) extends InputProcessor {
       `type` match {
         case InputProcessorQueue.KEY_PRESS =>
           val keyPressed: Int = queue.remove(0)
-          receivers.forEach((r: InputProcessor) => {
+          receivers.forEach((r: InputListener) => {
             r.onKeyPressed(keyPressed)
           })
         case InputProcessorQueue.KEY_RELEASE =>
           val keyReleased: Int = queue.remove(0)
-          receivers.forEach((r: InputProcessor) => {
+          receivers.forEach((r: InputListener) => {
             r.onKeyReleased(keyReleased)
           })
         case InputProcessorQueue.KEY_TYPED =>
           val character: Char = queue.remove(0).intValue.toChar
-          receivers.forEach((r: InputProcessor) => {
+          receivers.forEach((r: InputListener) => {
             r.onKeyTyped(character)
           })
         case InputProcessorQueue.MOUSE_BUTTON_PRESSED =>
           val pressedX: Int = queue.remove(0)
           val pressedY: Int = queue.remove(0)
           val pressedButton: Int = queue.remove(0)
-          receivers.forEach((r: InputProcessor) => {
+          receivers.forEach((r: InputListener) => {
             r.onMousePressed(pressedX, pressedY, pressedButton)
           })
         case InputProcessorQueue.MOUSE_BUTTON_RELEASED =>
           val releasedX: Int = queue.remove(0)
           val releasedY: Int = queue.remove(0)
           val releasedButton: Int = queue.remove(0)
-          receivers.forEach((r: InputProcessor) => {
+          receivers.forEach((r: InputListener) => {
             r.onMouseReleased(releasedX, releasedY, releasedButton)
           })
         case InputProcessorQueue.MOUSE_MOVED =>
           val moveX: Int = queue.remove(0)
           val moveY: Int = queue.remove(0)
-          receivers.forEach((r: InputProcessor) => {
+          receivers.forEach((r: InputListener) => {
             r.onMouseMoved(moveX, moveY)
           })
         case InputProcessorQueue.SCROLL =>
           val dir: Int = queue.remove(0)
-          receivers.forEach((r: InputProcessor) => {
+          receivers.forEach((r: InputListener) => {
             r.onScroll(dir)
           })
         case _ =>

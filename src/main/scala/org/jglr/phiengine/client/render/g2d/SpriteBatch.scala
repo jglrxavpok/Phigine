@@ -37,11 +37,11 @@ class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * Batch.
     draw(texture, x, y, z, w, h)
   }
 
-  def draw(region: TextureRegion, x: Float, y: Float, z: Float, w: Float, h: Float) {
-    addVertex(x, y, z, region.getMinU, region.getMaxV, Colors.white)
-    addVertex(x + w, y, z, region.getMaxU, region.getMaxV, Colors.white)
-    addVertex(x + w, y + h, z, region.getMaxU, region.getMinV, Colors.white)
-    addVertex(x, y + h, z, region.getMinU, region.getMinV, Colors.white)
+  def draw(region: TextureRegion, x: Float, y: Float, z: Float, w: Float, h: Float, color: Color) {
+    addVertex(x, y, z, region.getMinU, region.getMaxV, color)
+    addVertex(x + w, y, z, region.getMaxU, region.getMaxV, color)
+    addVertex(x + w, y + h, z, region.getMaxU, region.getMinV, color)
+    addVertex(x, y + h, z, region.getMinU, region.getMinV, color)
     addIndex(1)
     addIndex(0)
     addIndex(2)

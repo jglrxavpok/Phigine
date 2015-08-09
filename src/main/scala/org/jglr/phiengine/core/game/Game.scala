@@ -8,6 +8,7 @@ import org.jglr.phiengine.core.maths.Mat4
 import org.jglr.phiengine.core.utils.PhiConfig
 
 abstract class Game(val engine: PhiEngine) {
+  def pollEvents(): Unit = {}
 
   def getName: String
 
@@ -26,7 +27,7 @@ abstract class Game(val engine: PhiEngine) {
   }
 
   def addInputProcessor(proc: InputProcessor) {
-    engine.addInputProcessor(proc)
+    engine.addInputListener(proc)
   }
 
   def setBackgroundColor(color: Color) = {

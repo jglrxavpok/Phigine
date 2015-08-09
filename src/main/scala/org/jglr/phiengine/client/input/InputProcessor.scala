@@ -1,9 +1,8 @@
 package org.jglr.phiengine.client.input
 
-import org.jglr.phiengine.core.PhiEngine
 import org.lwjgl.glfw._
 
-abstract class InputProcessor {
+abstract class InputProcessor extends InputListener {
   private var currentMouseX: Int = 0
   private var currentMouseY: Int = 0
 
@@ -44,17 +43,4 @@ abstract class InputProcessor {
     }
   }
 
-  def onKeyPressed(keycode: Int): Boolean
-
-  def onKeyReleased(keycode: Int): Boolean
-
-  def onKeyTyped(character: Char): Boolean
-
-  def onMousePressed(screenX: Int, screenY: Int, button: Int): Boolean
-
-  def onMouseReleased(screenX: Int, screenY: Int, button: Int): Boolean
-
-  def onMouseMoved(screenX: Int, screenY: Int): Boolean
-
-  def onScroll(dir: Int): Boolean
 }

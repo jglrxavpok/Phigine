@@ -2,11 +2,14 @@ package org.jglr.phiengine.client.ui
 
 import java.util.{Map, HashMap, ArrayList, List}
 
+import org.jglr.phiengine.client.input.PovDirection.Type
+import org.jglr.phiengine.client.input.{ButtonMappings, Controller, ControllerListener, InputListener}
 import org.jglr.phiengine.client.render.TextureRegion
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
 import org.jglr.phiengine.core.maths.Vec2
 import org.jglr.phiengine.core.utils.JavaConversions._
+import org.lwjgl.glfw.GLFW
 import scala.collection.JavaConversions._
 
 object ComponentState extends Enumeration {
@@ -37,7 +40,7 @@ abstract class ComponentTextures(val prefix: String) {
   }
 }
 
-abstract class UIComponent(fontRenderer: FontRenderer) {
+abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener with ControllerListener {
 
   val children: List[UIComponent] = new ArrayList[UIComponent]
   var layout: UILayout = null
@@ -47,6 +50,13 @@ abstract class UIComponent(fontRenderer: FontRenderer) {
   var minSize: Vec2 = new Vec2(10,10)
   var w: Float = minSize.x
   var h: Float = minSize.y
+  private var selected: UIComponent = null
+  var nextComponent: UIComponent = this
+  var previousComponent: UIComponent = this
+  var state = ComponentState.IDLE
+  var time: Float = 0f
+  var lastTimeAxisMoved: Float = 0f
+  var margins: Vec2 = new Vec2(0,0)
 
   def addChild(child: UIComponent): Unit = {
     if(children.add(child) && layout != null)
@@ -100,12 +110,176 @@ abstract class UIComponent(fontRenderer: FontRenderer) {
     children.forEach((c: UIComponent) => c.render(delta, batch))
   }
 
-  def updateSelf(delta: Float) = {}
+  def updateSelf(delta: Float) = {
+    time += delta
+  }
 
   def renderSelf(delta: Float, batch: SpriteBatch) = {}
 
   def update(delta: Float): Unit = {
     updateSelf(delta)
     children.forEach((c: UIComponent) => c.update(delta))
+  }
+
+  override def onKeyPressed(keycode: Int): Boolean = {
+    for(c <- children) {
+      if(c.onKeyPressed(keycode))
+        return true
+    }
+    false
+  }
+
+  override def onKeyReleased(keycode: Int): Boolean = {
+    for(c <- children) {
+      if(c.onKeyReleased(keycode))
+        return true
+    }
+    false
+  }
+
+  override def onMouseMoved(screenX: Int, screenY: Int): Boolean = {
+    for(c <- children) {
+      if(c.onMouseMoved(screenX, screenY))
+        return true
+    }
+    false
+  }
+
+  override def onMousePressed(screenX: Int, screenY: Int, button: Int): Boolean = {
+    selected = null
+    for(c <- children) {
+      if (c.onMousePressed(screenX, screenY, button) && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        selected = c
+        return true
+      }
+    }
+    false
+  }
+
+  override def onKeyTyped(character: Char): Boolean = {
+    for(c <- children) {
+      if(c.onKeyTyped(character))
+        return true
+    }
+    false
+  }
+
+  override def onMouseReleased(screenX: Int, screenY: Int, button: Int): Boolean = {
+    for(c <- children) {
+      if(c.onMouseReleased(screenX, screenY, button) && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if(selected == c) {
+          onComponentClicked(selected)
+        }
+        return true
+      }
+    }
+    selected = null
+    false
+  }
+
+  override def onScroll(dir: Int): Boolean = {
+    for(c <- children) {
+      if(c.onScroll(dir))
+        return true
+    }
+    false
+  }
+
+  override def onConnection(controller: Controller): Unit = {
+    children.forEach((c: UIComponent) => c.onConnection(controller))
+  }
+
+  override def onPovMoved(controller: Controller, povCode: Int, value: Type): Boolean = {
+    for(c <- children) {
+      if(c.onPovMoved(controller, povCode, value))
+        return true
+    }
+    false
+  }
+
+  override def onAxisMoved(controller: Controller, axisCode: Int, value: Float): Boolean = {
+    if(Math.abs(value) < 0.25f || time-lastTimeAxisMoved < 0.65f)
+      return false
+    lastTimeAxisMoved = time
+    if(!children.isEmpty && axisCode == ButtonMappings.yLeftAxis) {
+      val dir = Math.signum(value)
+      val origin =
+        if(selected == null)
+          children(0)
+        else
+          selected
+      val newSelected: UIComponent =
+        dir match {
+          case 1f =>
+            origin.nextComponent
+          case -1f =>
+            origin.previousComponent
+
+          case _ =>
+            null
+        }
+      if(newSelected != null) {
+        if(selected != null) {
+          selected.state = ComponentState.IDLE
+        }
+        selected = newSelected
+        selected.state = ComponentState.HOVERED
+      }
+    }
+    for(c <- children) {
+      if(c.onAxisMoved(controller, axisCode, value))
+        return true
+    }
+    false
+  }
+
+  override def onButtonPressed(controller: Controller, buttonCode: Int): Boolean = {
+    selected = null
+    for(c <- children) {
+      if (c.onButtonPressed(controller, buttonCode) && buttonCode == ButtonMappings.confirm) {
+        selected = c
+        return true
+      }
+    }
+    false
+  }
+
+  override def onDisconnection(controller: Controller): Unit = {
+    children.forEach((c: UIComponent) => c.onDisconnection(controller))
+  }
+
+  override def onButtonReleased(controller: Controller, buttonCode: Int): Boolean = {
+    for(c <- children) {
+      if(c.onButtonReleased(controller, buttonCode) && buttonCode == ButtonMappings.confirm) {
+        if(selected == c) {
+          onComponentClicked(c)
+        }
+        return true
+      }
+    }
+    selected = null
+    false
+  }
+
+  def onComponentClicked(comp: UIComponent): Unit = {}
+
+  def isMouseOn(mx: Int, my: Int, x: Float, y: Float, w: Float, h: Float): Boolean = {
+    (mx > x && mx <= x+w) && (my > y && my <= y+h)
+  }
+
+  override def toString: String = {
+    if(children.isEmpty) {
+      "Empty"
+    } else {
+      val builder = new StringBuilder()
+      var first = true
+      for(c <- children) {
+        if(!first)
+          builder.append(", ")
+        first = false
+        builder.append(c.toString)
+      }
+      builder.toString
+    }
   }
 }

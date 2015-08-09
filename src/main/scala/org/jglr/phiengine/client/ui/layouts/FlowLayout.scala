@@ -79,12 +79,12 @@ class FlowLayout(comp: UIComponent, var xSpacing: Float = 5f, var ySpacing: Floa
       case _ =>
     }
 
-    var currentY = 0f
+    var currentY = comp.margins.y
     var currentWidth = 0f
     val rowList = new LinkedList[UIComponent]()
     for(c <- comp.children) {
-      if(currentWidth + c.w + xSpacing > comp.w) {
-        currentY += move(rowList, xCentered, startX, currentY, widthReduction, direction, currentWidth)+ySpacing
+      if(currentWidth + c.w + xSpacing > comp.w+comp.margins.x*2) {
+        currentY += move(rowList, xCentered, startX+comp.margins.x, currentY, widthReduction, direction, currentWidth)+ySpacing
         currentWidth = 0f
         rowList.clear()
       }
@@ -92,7 +92,7 @@ class FlowLayout(comp: UIComponent, var xSpacing: Float = 5f, var ySpacing: Floa
       currentWidth+=c.w+xSpacing
     }
     if(!rowList.isEmpty)
-      currentY += move(rowList, xCentered, startX, currentY, widthReduction, direction, currentWidth)+ySpacing
+      currentY += move(rowList, xCentered, startX+comp.margins.x, currentY, widthReduction, direction, currentWidth)+ySpacing
     rowList.clear()
   }
 }

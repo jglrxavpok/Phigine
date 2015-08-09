@@ -18,6 +18,8 @@ object UITextures extends TextureMap(new FilePointer("assets/textures/ui/")) {
 
 class UI(var fontRenderer: FontRenderer = null) extends UIComponent(fontRenderer) {
 
+  val engine = PhiEngine.getInstance()
+
   if(fontRenderer == null) {
     fontRenderer = new FontRenderer(FontRenderer.ASCII, Font.get("Arial", 28, false))
   }
@@ -25,10 +27,12 @@ class UI(var fontRenderer: FontRenderer = null) extends UIComponent(fontRenderer
   val batch = new SpriteBatch()
   batch.setTexture(UITextures)
 
+  w = engine.getDisplayWidth()
+  h = engine.getDisplayWidth()
+
+  engine.addInputListener(this)
+
   override def render(delta: Float, batch: SpriteBatch = batch): Unit = {
     super.render(delta, batch)
   }
-
-  w = PhiEngine.getInstance().getDisplayWidth()
-  h = PhiEngine.getInstance().getDisplayWidth()
 }

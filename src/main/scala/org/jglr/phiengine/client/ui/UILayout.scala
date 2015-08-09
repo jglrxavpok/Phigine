@@ -36,7 +36,7 @@ abstract class UILayout(comp: UIComponent) {
         maxY = c.y+c.h
     }
 
-    new Vec2(maxX-minX, maxY-minY)
+    new Vec2(maxX-minX + comp.margins.x*2, maxY-minY + comp.margins.y*2)
   }
 
   def recalculatePositions(): Unit

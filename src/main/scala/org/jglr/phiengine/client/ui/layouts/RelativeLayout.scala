@@ -8,8 +8,8 @@ class RelativeLayout(comp: UIComponent) extends UILayout(comp) {
 
   override def onComponentAdded(added: UIComponent): Unit = {
     super.onComponentAdded(added)
-    added.x += comp.x
-    added.y += comp.y
+    added.x += comp.x+comp.margins.x
+    added.y += comp.y+comp.margins.y
   }
 
   override def onComponentRemoved(removed: UIComponent): Unit = {
@@ -18,8 +18,8 @@ class RelativeLayout(comp: UIComponent) extends UILayout(comp) {
 
   override def recalculatePositions(): Unit = {
     for(c <- comp.children) {
-      c.x = getPosition(c).x+comp.x
-      c.y = getPosition(c).y+comp.y
+      c.x = getPosition(c).x+comp.x+comp.margins.x
+      c.y = getPosition(c).y+comp.y+comp.margins.y
       c.onMoved()
     }
   }
