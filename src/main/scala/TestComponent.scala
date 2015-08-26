@@ -1,4 +1,4 @@
-import org.jglr.phiengine.client.render.Texture
+import org.jglr.phiengine.client.render.{Texture}
 import org.jglr.phiengine.client.render.g2d.{SpriteComponent, SpriteBatch, G2DComponent}
 import org.jglr.phiengine.core.entity.Entity
 

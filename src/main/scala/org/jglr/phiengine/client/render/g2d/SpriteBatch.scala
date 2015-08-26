@@ -2,6 +2,11 @@ package org.jglr.phiengine.client.render.g2d
 
 import org.jglr.phiengine.client.render._
 
+/**
+ * Batch specialized in sprite rendering (aka. textured quads)
+ * @param spriteLimit
+ *                    The maximum number of sprites in one rendering
+ */
 class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * Batch.vertexSize * 4, spriteLimit * 3 * 2,
   defaultShader = new Shader("assets/shaders/sprites.glsl")) {
 
@@ -10,10 +15,6 @@ class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * Batch.
 
   def getSpriteLimit: Int = {
     spriteLimit
-  }
-
-  override def end(): Unit = {
-    super.end()
   }
 
   override def flush(): Unit = {
@@ -31,12 +32,40 @@ class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * Batch.
     reset()
   }
 
-  def draw(texture: ITexture, x: Float, y: Float, z: Float = 0) {
-    val w: Float = texture.getWidth()
-    val h: Float = texture.getHeight()
+  /**
+   * Draws a texture in the batch.
+   * @param texture
+   *                The texture to draw
+   * @param x
+   *          The x coordinate of the top left vertex of the texture
+   * @param y
+   *          The y coordinate of the top left vertex of the texture
+   * @param z
+   *          The z coordinate of the top left vertex of the texture
+   */
+  def draw(texture: ITexture, x: Float, y: Float, z: Float = 0f) {
+    val w: Float = texture.getWidth
+    val h: Float = texture.getHeight
     draw(texture, x, y, z, w, h)
   }
 
+  /**
+   * Draws a texture region in the batch.
+   * @param region
+   *                The texture region to draw
+   * @param x
+   *          The x coordinate of the top left vertex of the region
+   * @param y
+   *          The y coordinate of the top left vertex of the region
+   * @param z
+   *          The z coordinate of the top left vertex of the region
+   * @param w
+   *          The width of the texture region
+   * @param h
+   *          The height of the texture region
+   * @param color
+   *              The color in which to draw the region, use `Colors.white` if you want to keep the default aspect
+   */
   def draw(region: TextureRegion, x: Float, y: Float, z: Float, w: Float, h: Float, color: Color) {
     addVertex(x, y, z, region.getMinU, region.getMaxV, color)
     addVertex(x + w, y, z, region.getMaxU, region.getMaxV, color)
@@ -52,12 +81,23 @@ class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * Batch.
     nextSprite()
   }
 
+  /**
+   * Draws a texture in the batch.
+   * @param texture
+   *                The texture to draw
+   * @param x
+   *          The x coordinate of the top left vertex of the texture
+   * @param y
+   *          The y coordinate of the top left vertex of the texture
+   * @param z
+   *          The z coordinate of the top left vertex of the texture
+   * @param w
+   *          The width of the texture
+   * @param h
+   *          The height of the texture
+   */
   def draw(texture: ITexture, x: Float, y: Float, z: Float, w: Float, h: Float) {
-    if (currentText != texture) {
-      flush()
-      currentText = texture
-      currentText.bind()
-    }
+    setTexture(texture)
     addVertex(x, y, z, 0, 1, Colors.white)
     addVertex(x + w, y, z, 1, 1, Colors.white)
     addVertex(x + w, y + h, z, 1, 0, Colors.white)
@@ -72,6 +112,9 @@ class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * Batch.
     nextSprite()
   }
 
+  /**
+   * Prepares the batch to render another sprite, flushes if reaching spriteLimit
+   */
   def nextSprite() {
     addToCursor(4)
     spriteCount += 1
@@ -80,11 +123,17 @@ class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * Batch.
     }
   }
 
+  /**
+   * Sets the texture used by the batch, flushes before setting it if the current one is different from `texture`
+   * @param texture
+   *                The texture to set
+   */
   def setTexture(texture: ITexture) {
     if (texture != currentText) {
       flush()
+      this.currentText = texture
+      currentText.bind()
     }
-    this.currentText = texture
   }
 
 }

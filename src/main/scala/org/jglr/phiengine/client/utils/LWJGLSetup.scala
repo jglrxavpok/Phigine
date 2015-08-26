@@ -5,7 +5,7 @@ import java.util
 import java.util._
 import java.util.regex._
 import com.google.common.collect._
-import org.jglr.phiengine.core.utils.{SystemUtils, IOUtils, OperatingSystem}
+import org.jglr.phiengine.core.utils.{StringUtils, SystemUtils, IOUtils, OperatingSystem}
 import org.slf4j._
 
 object LWJGLSetup {
@@ -53,11 +53,7 @@ object LWJGLSetup {
   }
 
   private def sum(parts: Array[String], offset: Int, length: Int): String = {
-    val buffer: StringBuilder = new StringBuilder
-    for(i <- offset until (offset + length)) {
-      buffer.append(parts(i))
-    }
-    buffer.toString()
+    StringUtils.sum(parts, "", offset, length)
   }
 
   private def exists(fileName: String): Boolean = {

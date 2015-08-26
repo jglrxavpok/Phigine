@@ -4,6 +4,10 @@ import org.lwjgl.glfw.GLFW._
 import org.lwjgl.opengl.GL11._
 
 class WindowPointer(val pointer: Long) {
+  def setSize(width: Int, height: Int) = {
+    glfwSetWindowSize(pointer, width, height)
+  }
+
 
   def destroy {
     glfwDestroyWindow(pointer)

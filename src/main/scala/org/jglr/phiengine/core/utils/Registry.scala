@@ -18,6 +18,8 @@ class Registry[Key >: Null, Value] {
     map.get(key)
   }
 
+  def delete(key: Key): Value = map.remove(key)
+
   def foreachValue(action: Consumer[_ >: Value]) {
     map.values.forEach(action)
   }

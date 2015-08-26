@@ -2,6 +2,7 @@ package org.jglr.phiengine.client.ui
 
 import java.util.HashMap
 
+import org.jglr.phiengine.client.ui.components.UILabel
 import org.jglr.phiengine.core.maths.Vec2
 import scala.collection.JavaConversions._
 
@@ -10,7 +11,11 @@ abstract class UILayout(comp: UIComponent) {
   private val positions = new HashMap[UIComponent, Vec2]
 
   def onComponentAdded(added: UIComponent): Unit = {
-    positions.put(added, new Vec2(added.x, added.y))
+    resetPosition(added)
+  }
+
+  def resetPosition(comp: UIComponent) = {
+    positions.put(comp, new Vec2(comp.x, comp.y))
   }
 
   def onComponentRemoved(removed: UIComponent): Unit = {

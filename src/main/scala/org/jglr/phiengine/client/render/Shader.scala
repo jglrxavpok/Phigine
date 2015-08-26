@@ -16,15 +16,19 @@ import org.lwjgl.opengl.GL43._
 import scala.collection.JavaConversions._
 import org.jglr.phiengine.core.utils.JavaConversions._
 
-object Shader {
+object Shaders {
   val POS_INDEX: Int = 0
   val UV_INDEX: Int = 1
   val COLOR_INDEX: Int = 2
+
+  var outputList = false
+  var shouldCache = false
+
+  var cache = new HashMap[FilePointer, ShaderHandle]
 }
 
-@throws(classOf[IOException])
-class Shader(shader: FilePointer) {
-  private final val uniforms: List[Shader#Uniform] = new ArrayList
+class ShaderHandle(shader: FilePointer) {
+  private final val uniforms: List[Uniform] = new ArrayList
   private final val locations: Map[String, Int] = new HashMap
   private final val id: Int = glCreateProgram
   private final val path: FilePointer = shader
@@ -38,20 +42,20 @@ class Shader(shader: FilePointer) {
   glAttachShader(id, fragID)
   glLinkProgram(id)
   if (glGetProgrami(id, GL_LINK_STATUS) == 0) {
-    PhiEngine.getInstance().getLogger().error("Failed to link shader \n" + glGetProgramInfoLog(id))
+    PhiEngine.getInstance.getLogger.error("Failed to link shader \n" + glGetProgramInfoLog(id))
   }
 
-  def bind() {
+  def bind(): Unit = {
     glUseProgram(id)
-    update
+    update()
   }
 
-  def update() {
-    uniforms.forEach((u: Shader#Uniform) => {
+  def update(): Unit = {
+    uniforms.forEach((u: Uniform) => {
       if (u.name.equals("u_projection")) {
-        setUniformMat4(u.name, PhiEngine.getInstance().getProjectionMatrix())
+        setUniformMat4(u.name, PhiEngine.getInstance.getProjectionMatrix)
       } else if (u.name.equals("u_time")) {
-        setUniformd(u.name, PhiEngine.getInstance().getTime())
+        setUniformd(u.name, PhiEngine.getInstance.getTime)
       }
     })
   }
@@ -74,7 +78,7 @@ class Shader(shader: FilePointer) {
     glShaderSource(id, source)
     glCompileShader(id)
     if (glGetShaderi(id, GL_COMPILE_STATUS) == 0) {
-      PhiEngine.getInstance().getLogger().error("Failed to load shader " + file + "\n" + glGetShaderInfoLog(id))
+      PhiEngine.getInstance.getLogger.error("Failed to load shader " + file + "\n" + glGetShaderInfoLog(id))
     }
     id
   }
@@ -115,7 +119,7 @@ class Shader(shader: FilePointer) {
         } else if (command.startsWith("include ")) {
           val arg: String = command.substring("include ".length)
           val toInclude: FilePointer = path.relative(arg)
-          PhiEngine.getInstance().getLogger().info("Including shader file "+toInclude+" inside "+path)
+          PhiEngine.getInstance.getLogger.info("Including shader file "+toInclude+" inside "+path)
           val content: String = preprocess(toInclude.strReadAll)
           builder.append(content)
         }
@@ -165,7 +169,7 @@ class Shader(shader: FilePointer) {
     }
     else {
       loc = glGetUniformLocation(id, name)
-      if (loc == -1) PhiEngine.getInstance().getLogger().error("Uniform with name '" + name + "' not found")
+      if (loc == -1) PhiEngine.getInstance.getLogger.error("Uniform with name '" + name + "' not found")
       locations.put(name, loc)
     }
     loc
@@ -190,11 +194,6 @@ class Shader(shader: FilePointer) {
     glUseProgram(0)
   }
 
-  class Uniform {
-    var name: String = null
-    var uniformType: String = null
-  }
-
   def define(arg: String, value: String) {
     registry.register(arg, value)
   }
@@ -210,4 +209,53 @@ class Shader(shader: FilePointer) {
   def undefine(s: String) {
     registry.remove(s)
   }
+}
+
+@throws(classOf[IOException])
+class Shader(shader: FilePointer) {
+  val handle: ShaderHandle =
+    if(Shaders.shouldCache) {
+      if(Shaders.cache.containsKey(shader)) {
+        Shaders.cache.get(shader)
+      } else {
+        val newHandle = new ShaderHandle(shader)
+        Shaders.cache.put(shader, newHandle)
+        newHandle
+      }
+    } else {
+      new ShaderHandle(shader)
+    }
+
+  def setUniformf(name: String, value: Float) {
+    handle.setUniformf(name, value)
+  }
+
+  def setUniformi(name: String, value: Int) {
+    handle.setUniformi(name, value)
+  }
+
+  def setUniformd(name: String, value: Double) {
+    handle.setUniformd(name, value)
+  }
+
+  def setUniformMat4(name: String, m: Mat4) {
+    handle.setUniformMat4(name, m)
+  }
+
+  def bind(): Unit = {
+    handle.bind()
+  }
+
+  def update(): Unit = {
+    handle.update()
+  }
+
+  def unbind() {
+    glUseProgram(0)
+  }
+}
+
+class Uniform {
+  var name: String = null
+  var uniformType: String = null
 }

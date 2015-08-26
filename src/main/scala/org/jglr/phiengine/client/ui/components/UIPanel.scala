@@ -6,4 +6,9 @@ import org.jglr.phiengine.client.ui.layouts.FlowLayout
 
 class UIPanel(val fontRenderer: FontRenderer) extends UIComponent(fontRenderer) {
   layout = new FlowLayout(this)
+
+  override def onMoved(): Unit = {
+    super.onMoved()
+    layout.recalculatePositions()
+  }
 }

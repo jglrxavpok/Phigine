@@ -77,7 +77,7 @@ class Matrix(val rows: Int, val columns: Int, _data: Array[Float] = null) {
 
   def copyFrom(other: Matrix): Unit = {
     if(other.rows != rows || other.columns != columns) {
-      throw new IllegalArgumentException("Cannot copy from different sized matrices (this: "+this.toString+", other: "+other.toString+")")
+      throw new IllegalArgumentException(s"Cannot copy from different sized matrix (this: $this, other: $other)")
     }
     for(i <- 0 until rows) {
       for(j <- 0 until columns) {
@@ -94,6 +94,14 @@ class Matrix(val rows: Int, val columns: Int, _data: Array[Float] = null) {
       }
     }
     copyFrom(tmp)
+    this
+  }
+
+  def set(values: Array[Float]): Matrix = {
+    if(values.length != data.length) throw new IllegalArgumentException(s"New matrix data length (${values.length} must be equal to the current data length (${data.length})")
+    for(i <- values.indices) {
+      data(i) = values(i)
+    }
     this
   }
 }

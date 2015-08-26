@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11._
 
 class KeyboardController(val engine: PhiEngine) extends Controller(0) {
 
-  override def poll {
+  override def poll() {
   }
 
   override def isConnected: Boolean = {

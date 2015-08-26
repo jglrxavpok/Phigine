@@ -44,8 +44,8 @@ class InputHandler(val engine: PhiEngine) extends InputProcessor {
   }
 
   def onMouseMoved(screenX: Int, screenY: Int): Boolean = {
-    var result: Boolean = update(Input.MOUSE_MOVE_X, mouseButtons, screenX, false)
-    result |= update(Input.MOUSE_MOVE_Y, mouseButtons, screenY, false)
+    var result: Boolean = update(Input.MOUSE_MOVE_X, mouseMoveListeners, screenX, false)
+    result |= update(Input.MOUSE_MOVE_Y, mouseMoveListeners, screenY, false)
     result
   }
 

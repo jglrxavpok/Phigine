@@ -21,15 +21,20 @@ object Controllers {
 }
 
 class Controller(val id: Int = 0) {
+
   private final val buttons: Map[Int, Boolean] = new HashMap[Int, Boolean]
   private final val axes: Map[Int, Float] = new HashMap[Int, Float]
   private var name: String = null
   private var listener: ControllerListener = null
   private var connected: Boolean = false
+  var buttonCount: Int = 0
+  var axisCount: Int = 0
 
   if (id > GLFW_JOYSTICK_LAST) {
     throw new IllegalArgumentException("Cannot specify an id greater than " + GLFW_JOYSTICK_LAST + ", got " + id)
   }
+
+  poll()
 
   def setListener(listener: ControllerListener) {
     this.listener = listener
@@ -54,6 +59,8 @@ class Controller(val id: Int = 0) {
     }
     val buttons: ByteBuffer = glfwGetJoystickButtons(id)
     val axes: FloatBuffer = glfwGetJoystickAxes(id)
+    axisCount = axes.remaining()
+    buttonCount = buttons.remaining()
     var buttonIndex: Int = 0
     while (buttons.hasRemaining) {
       val state: Boolean = buttons.get == 1
@@ -77,6 +84,10 @@ class Controller(val id: Int = 0) {
     }
   }
 
+  def hasButton(i: Int): Boolean = {
+    buttons.containsKey(i)
+  }
+
   def getAxisValue(axisIndex: Int): Float = {
     if (axes.containsKey(axisIndex)) return axes.get(axisIndex)
     0f
@@ -87,6 +98,7 @@ class Controller(val id: Int = 0) {
   }
 
   private def fireConnected() {
+    println(s"$id connected as $name")
     if (listener != null) listener.onConnection(this)
   }
 

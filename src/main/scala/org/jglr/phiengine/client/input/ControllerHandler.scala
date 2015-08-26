@@ -3,6 +3,7 @@ package org.jglr.phiengine.client.input
 import java.util.function.Predicate
 
 import com.google.common.collect.Lists
+import org.jglr.phiengine.client.ui.UI
 import org.jglr.phiengine.core.PhiEngine
 import org.lwjgl.glfw.GLFW
 import java.util.ArrayList
@@ -12,41 +13,67 @@ import scala.concurrent.JavaConversions._
 import org.jglr.phiengine.core.utils.JavaConversions._
 
 class ControllerHandler(val engine: PhiEngine) extends ControllerListener {
+
+  private var listener: ControllerListener = null
   private final val axises: List[Input] = new ArrayList[Input]
   private final val povs: List[Input] = new ArrayList[Input]
   private final val buttons: List[Input] = new ArrayList[Input]
   private final val controllers: List[Controller] = new ArrayList[Controller]
 
-  def onConnection(controller: Controller) {
+  def setListener(listener: ControllerListener) = this.listener = listener
+
+  def onConnection(controller: Controller): Unit = {
+    if(listener != null)
+      listener.onConnection(controller)
   }
 
-  def onDisconnection(controller: Controller) {
+  def onDisconnection(controller: Controller): Unit = {
+    if(listener != null)
+      listener.onDisconnection(controller)
   }
 
   def onButtonPressed(controller: Controller, buttonCode: Int): Boolean = {
+    if(listener != null)
+      listener.onButtonPressed(controller, buttonCode)
     update(controller, buttonCode, buttons, 1f, true)
   }
 
   private def update(controller: Controller, id: Int, list: List[Input], value: Float, isPressed: Boolean): Boolean = {
+    var result = false
     for (input <- list) {
       if (input.getId == id && input.getController == controller) {
         input.isPressed = isPressed
         input.setValue(value)
-        return true
+        if(input.isTrigger) {
+          input.isPressed = Math.abs(value) > Math.abs(input.getThreshold) &&
+            Math.signum(value) == Math.signum(input.getThreshold)
+          if(input.isPressed) {
+            input.setValue(Math.abs(value))
+          } else {
+            input.setValue(0f)
+          }
+        }
+        result = true
       }
     }
-    false
+    result
   }
 
   def onButtonReleased(controller: Controller, buttonCode: Int): Boolean = {
+    if(listener != null)
+      listener.onButtonReleased(controller, buttonCode)
     update(controller, buttonCode, buttons, 0f, false)
   }
 
   def onAxisMoved(controller: Controller, axisCode: Int, value: Float): Boolean = {
+    if(listener != null)
+      listener.onAxisMoved(controller, axisCode, value)
     update(controller, axisCode, axises, value, false)
   }
 
   def onPovMoved(controller: Controller, povCode: Int, value: PovDirection.Type): Boolean = {
+    if(listener != null)
+      listener.onPovMoved(controller, povCode, value)
     false
   }
 

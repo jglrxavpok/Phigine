@@ -9,7 +9,7 @@ object FilePointer {
   }
 }
 
-class FilePointer(val _path: String, val fileType: FileType.Type = FileType.CLASSPATH) {
+class FilePointer(val _path: String, val fileType: FileType.Type = FileType.CLASSPATH) extends Comparable[FilePointer] {
   private final val path: String = _path.replace("\\", "/")
 
   @throws(classOf[IOException])
@@ -126,4 +126,6 @@ class FilePointer(val _path: String, val fileType: FileType.Type = FileType.CLAS
     result = MULTIPLIER * result + fileType.id
     result
   }
+
+  override def compareTo(o: FilePointer): Int = toString.compareTo(o.toString)
 }

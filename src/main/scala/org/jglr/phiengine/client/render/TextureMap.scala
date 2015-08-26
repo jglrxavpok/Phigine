@@ -27,7 +27,7 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
   stitcher = new Stitcher(emptyImage, putInCorner)
 
   /**
-   * Completes given ResourceLocation to get full ResourceLocation from base
+   * Completes given FilePointer to get full FilePointer from base
    */
   def completeLocation(loc: FilePointer): FilePointer = {
     new FilePointer(base.getPath + loc.getPath)
@@ -134,7 +134,7 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
         }
         catch {
           case e: Exception => {
-            PhiEngine.getInstance().getLogger().error("Unable to find icon: /" + loc.getPath)
+            PhiEngine.getInstance.getLogger.error("Unable to find icon: /" + loc.getPath)
             img = nullImage
             icon.isNull = true
           }
@@ -161,7 +161,7 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
         icon.setHeight(stitcher.getHeight(index))
       }
     }
-    texture = Texture.createFrom(stitchedImage)
+    texture = Textures.createFrom(base.getPath, stitchedImage)
   }
 
   def writeDebugTexture(): Unit = {
@@ -199,6 +199,10 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
    */
   def getTexture: Texture = {
     texture
+  }
+
+  def clear(): Unit = {
+    registredSprites.clear()
   }
 
   /**
@@ -304,11 +308,11 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
     texture.unbind()
   }
 
-  override def getWidth(): Int = {
+  override def getWidth: Int = {
     texture.getWidth
   }
 
-  override def getHeight(): Int = {
+  override def getHeight: Int = {
     texture.getHeight
   }
 }

@@ -8,10 +8,15 @@ object Vec2 {
 }
 
 class Vec2(var x: Float = 0, var y: Float = 0) {
-
   def apply(x: Float, y: Float): Vec2 = {
     set(x, y)
   }
+
+  def apply(other: Vec2): Vec2 = {
+    set(other)
+  }
+
+  def copy = new Vec2(x,y)
 
   def set(v: Vec2): Vec2 = {
     this.x = v.x
@@ -41,6 +46,22 @@ class Vec2(var x: Float = 0, var y: Float = 0) {
     apply(this.x - x, this.y - y)
   }
 
+  def +(other: Vec2): Vec2 = {
+    this + (other.x, other.y)
+  }
+
+  def +(x: Float, y: Float): Vec2 = {
+    new Vec2(this.x + x, this.y + y)
+  }
+
+  def -(other: Vec2): Vec2 = {
+    this - (other.x, other.y)
+  }
+
+  def -(x: Float, y: Float): Vec2 = {
+    new Vec2(this.x - x, this.y - y)
+  }
+
   def *=(other: Vec2): Vec2 = {
     *=(other.x, other.y)
   }
@@ -65,8 +86,8 @@ class Vec2(var x: Float = 0, var y: Float = 0) {
 
   def ndot(x: Float, y: Float): Float = {
     val l: Float = length
-    val nx: Float = x / l
-    val ny: Float = y / l
+    val nx: Float = this.x / l
+    val ny: Float = this.y / l
     x * nx + y * ny
   }
 

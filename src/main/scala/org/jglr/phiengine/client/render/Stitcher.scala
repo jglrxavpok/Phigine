@@ -47,7 +47,7 @@ class Stitcher {
       tileHeight = img.getHeight
     } else if (img.getWidth != tileWidth || img.getHeight != tileHeight) {
       if (!forceResize && !putInCorner) {
-        PhiEngine.getInstance().getLogger().error("Unexpected size in " + name + ": " + img.getWidth + "x" + img.getHeight + "px, expected " + tileWidth + "x" + tileHeight + "px. Image index: " + imgs.size)
+        PhiEngine.getInstance.getLogger.error("Unexpected size in " + name + ": " + img.getWidth + "x" + img.getHeight + "px, expected " + tileWidth + "x" + tileHeight + "px. Image index: " + imgs.size)
       }
       else if (forceResize) {
         img = ImageUtils.resize(img, tileWidth, tileHeight)

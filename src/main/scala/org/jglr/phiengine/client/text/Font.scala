@@ -6,7 +6,7 @@ import java.io.{InputStream, File}
 
 import org.jglr.phiengine.core.io.FilePointer
 
-object FontFormat extends Enumeration {
+object FontFormat {
   sealed abstract class EnumVal(val rawValue: Int)
 
   case object PLAIN extends EnumVal(JFont.PLAIN)
@@ -48,7 +48,7 @@ object Font {
   }
 }
 
-class Font(javaFont: JFont, antialias: Boolean = true) {
+class Font(val javaFont: JFont, antialias: Boolean = true) {
 
   val tmpImg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
   val graph = tmpImg.createGraphics()
@@ -71,7 +71,7 @@ class Font(javaFont: JFont, antialias: Boolean = true) {
     result
   }
 
-  def getName(): String = {
+  def getName: String = {
     javaFont.getFontName
   }
 

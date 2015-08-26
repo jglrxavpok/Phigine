@@ -15,7 +15,22 @@ class Mat4(_data: Array[Float] = null) extends Matrix(4, 4, _data) {
           res.set(i, j, firstRow + secondRow + thirdRow + fourthRow)
       }
     }
-    return res
+    res
+  }
+
+  def *=(other: Mat4): Mat4 = {
+    val res: Array[Float] = new Array[Float](16)
+    for(i <- 0 until 4) {
+      for(j <- 0 until 4) {
+        val firstRow: Float = get(i, 0) * other.get(0, j)
+        val secondRow: Float = get(i, 1) * other.get(1, j)
+        val thirdRow: Float = get(i, 2) * other.get(2, j)
+        val fourthRow: Float = get(i, 3) * other.get(3, j)
+        res(j + i * 4) = firstRow + secondRow + thirdRow + fourthRow
+      }
+    }
+    set(res)
+    this
   }
 
   override def copy: Mat4 = new Mat4(data)

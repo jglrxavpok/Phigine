@@ -12,29 +12,32 @@ object Input {
 }
 
 class Input(private val id: Int, private val controller: Controller, private val name: String, private val inputType: Input.Type.Type) {
+
   private var threshold: Float = 0
   var isPressed: Boolean = false
   private var value: Float = 0
-
+  var isTrigger = false
   def setThreshold(threshold: Float): Input = {
     this.threshold = threshold
-    return this
+    this
   }
 
   def getController: Controller = {
-    return controller
+    controller
   }
 
+  def getThreshold = threshold
+
   def getName: String = {
-    return name
+    name
   }
 
   def getId: Int = {
-    return id
+    id
   }
 
   def getType: Input.Type.Type = {
-    return inputType
+    inputType
   }
 
   def setValue(value: Float): Input = {
@@ -42,10 +45,15 @@ class Input(private val id: Int, private val controller: Controller, private val
       this.value = 0f
     else
       this.value = value
-    return this
+    this
   }
 
   def getValue: Float = {
-    return value
+    value
+  }
+
+  def setTriggerLike(): Input = {
+    isTrigger = true
+    this
   }
 }

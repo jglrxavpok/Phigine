@@ -14,7 +14,7 @@ import scala.collection.JavaConversions._
 
 object ComponentState extends Enumeration {
   type Type = Value
-  val IDLE, HOVERED, FOCUSED = Value
+  val IDLE, HOVERED, FOCUSED, DISABLED = Value
 }
 
 abstract class ComponentTextures(val prefix: String) {
@@ -43,6 +43,8 @@ abstract class ComponentTextures(val prefix: String) {
 abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener with ControllerListener {
 
   val children: List[UIComponent] = new ArrayList[UIComponent]
+  val childrenToAdd: List[UIComponent] = new ArrayList[UIComponent]
+  val childrenToRemove: List[UIComponent] = new ArrayList[UIComponent]
   var layout: UILayout = null
   var x: Float = 0
   var y: Float = 0
@@ -57,15 +59,51 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   var time: Float = 0f
   var lastTimeAxisMoved: Float = 0f
   var margins: Vec2 = new Vec2(0,0)
+  var firstSelected: UIComponent = null
+  private var enabled = true
+  var allowControllerNavigation = true
+  private var updating = false
 
-  def addChild(child: UIComponent): Unit = {
-    if(children.add(child) && layout != null)
-      layout.onComponentAdded(child)
+  def addChild(child: UIComponent, ignoreUpdating: Boolean = false): UIComponent = {
+    if(!ignoreUpdating || !updating) {
+      if (children.add(child) && layout != null)
+        layout.onComponentAdded(child)
+    } else {
+      childrenToAdd.add(child)
+    }
+    this
   }
 
-  def removeChild(child: UIComponent): Unit = {
-    if(children.remove(child) && layout != null)
-      layout.onComponentRemoved(child)
+  def enable(): Unit = {
+    enabled = true
+  }
+
+  def disable(): Unit = {
+    enabled = false
+  }
+
+  def isEnabled: Boolean = {
+    enabled
+  }
+
+  def removeChild(child: UIComponent, ignoreUpdating: Boolean = false): UIComponent = {
+    if(!ignoreUpdating || !updating) {
+      if(children.remove(child) && layout != null)
+        layout.onComponentRemoved(child)
+    } else {
+      childrenToRemove.add(child)
+    }
+    this
+  }
+
+  def setState(newState: ComponentState.Type): UIComponent = {
+    onStateChanged(state, newState)
+    state = newState
+    this
+  }
+
+  def onStateChanged(oldState: ComponentState.Type, newState: ComponentState.Type): Unit = {
+
   }
 
   def onMoved(): Unit = {}
@@ -112,16 +150,34 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
 
   def updateSelf(delta: Float) = {
     time += delta
+    if(selected == null && firstSelected != null) {
+      selected = firstSelected
+      selected.setState(ComponentState.HOVERED)
+    }
+
+    while(!childrenToAdd.isEmpty) {
+      val child = childrenToAdd.remove(0)
+      addChild(child, true)
+    }
+
+    while(!childrenToRemove.isEmpty) {
+      val child = childrenToRemove.remove(0)
+      removeChild(child, true)
+    }
   }
 
   def renderSelf(delta: Float, batch: SpriteBatch) = {}
 
   def update(delta: Float): Unit = {
+    updating = true
     updateSelf(delta)
     children.forEach((c: UIComponent) => c.update(delta))
+    updating = false
   }
 
   override def onKeyPressed(keycode: Int): Boolean = {
+    if(!isEnabled)
+      return false
     for(c <- children) {
       if(c.onKeyPressed(keycode))
         return true
@@ -130,6 +186,8 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   override def onKeyReleased(keycode: Int): Boolean = {
+    if(!isEnabled)
+      return false
     for(c <- children) {
       if(c.onKeyReleased(keycode))
         return true
@@ -138,6 +196,8 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   override def onMouseMoved(screenX: Int, screenY: Int): Boolean = {
+    if(!isEnabled)
+      return false
     for(c <- children) {
       if(c.onMouseMoved(screenX, screenY))
         return true
@@ -146,6 +206,8 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   override def onMousePressed(screenX: Int, screenY: Int, button: Int): Boolean = {
+    if(!isEnabled)
+      return false
     selected = null
     for(c <- children) {
       if (c.onMousePressed(screenX, screenY, button) && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
@@ -157,6 +219,8 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   override def onKeyTyped(character: Char): Boolean = {
+    if(!isEnabled)
+      return false
     for(c <- children) {
       if(c.onKeyTyped(character))
         return true
@@ -165,6 +229,8 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   override def onMouseReleased(screenX: Int, screenY: Int, button: Int): Boolean = {
+    if(!isEnabled)
+      return false
     for(c <- children) {
       if(c.onMouseReleased(screenX, screenY, button) && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
         if(selected == c) {
@@ -178,6 +244,8 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   override def onScroll(dir: Int): Boolean = {
+    if(!isEnabled)
+      return false
     for(c <- children) {
       if(c.onScroll(dir))
         return true
@@ -186,18 +254,30 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   override def onConnection(controller: Controller): Unit = {
+    if(!isEnabled)
+      return
     children.forEach((c: UIComponent) => c.onConnection(controller))
   }
 
   override def onPovMoved(controller: Controller, povCode: Int, value: Type): Boolean = {
+    if(!isEnabled)
+    return false
     for(c <- children) {
       if(c.onPovMoved(controller, povCode, value))
-        return true
+      return true
     }
     false
   }
 
   override def onAxisMoved(controller: Controller, axisCode: Int, value: Float): Boolean = {
+    if(!isEnabled)
+      return false
+    for(c <- children) {
+      if(c.onAxisMoved(controller, axisCode, value))
+        return true
+    }
+    if(!allowControllerNavigation)
+      return false
     if(Math.abs(value) < 0.25f || time-lastTimeAxisMoved < 0.65f)
       return false
     lastTimeAxisMoved = time
@@ -205,39 +285,41 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
       val dir = Math.signum(value)
       val origin =
         if(selected == null)
-          children(0)
+          if(firstSelected != null)
+            firstSelected
+          else
+            children(0)
         else
           selected
       val newSelected: UIComponent =
         dir match {
-          case 1f =>
-            origin.nextComponent
-          case -1f =>
-            origin.previousComponent
+            case 1f =>
+              origin.nextComponent
+            case -1f =>
+              origin.previousComponent
 
-          case _ =>
-            null
+            case _ =>
+              null
         }
       if(newSelected != null) {
         if(selected != null) {
-          selected.state = ComponentState.IDLE
+          selected.setState(ComponentState.IDLE)
         }
         selected = newSelected
-        selected.state = ComponentState.HOVERED
+        selected.setState(ComponentState.HOVERED)
       }
-    }
-    for(c <- children) {
-      if(c.onAxisMoved(controller, axisCode, value))
-        return true
     }
     false
   }
 
   override def onButtonPressed(controller: Controller, buttonCode: Int): Boolean = {
+    if(!isEnabled)
+      return false
     selected = null
     for(c <- children) {
       if (c.onButtonPressed(controller, buttonCode) && buttonCode == ButtonMappings.confirm) {
-        selected = c
+        if(allowControllerNavigation)
+          selected = c
         return true
       }
     }
@@ -245,13 +327,17 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   override def onDisconnection(controller: Controller): Unit = {
+    if(!isEnabled)
+      return
     children.forEach((c: UIComponent) => c.onDisconnection(controller))
   }
 
   override def onButtonReleased(controller: Controller, buttonCode: Int): Boolean = {
+    if(!isEnabled)
+      return false
     for(c <- children) {
       if(c.onButtonReleased(controller, buttonCode) && buttonCode == ButtonMappings.confirm) {
-        if(selected == c) {
+        if(allowControllerNavigation && selected == c) {
           onComponentClicked(c)
         }
         return true
@@ -263,9 +349,11 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
 
   def onComponentClicked(comp: UIComponent): Unit = {}
 
-  def isMouseOn(mx: Int, my: Int, x: Float, y: Float, w: Float, h: Float): Boolean = {
+  def isMouseOn(mx: Float, my: Float, x: Float, y: Float, w: Float, h: Float): Boolean = {
     (mx > x && mx <= x+w) && (my > y && my <= y+h)
   }
+
+  def isHovered(mx: Float, my: Float): Boolean = isMouseOn(mx, my, x, y, w, h)
 
   override def toString: String = {
     if(children.isEmpty) {
@@ -279,7 +367,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
         first = false
         builder.append(c.toString)
       }
-      builder.toString
+      builder.toString()
     }
   }
 }

@@ -1,5 +1,5 @@
 import org.jglr.phiengine.client.input.{Input, ControllerHandler, Controllers, Controller}
-import org.jglr.phiengine.client.render.{Colors, LevelRenderer, Texture}
+import org.jglr.phiengine.client.render.{Texture, Colors, LevelRenderer}
 import org.jglr.phiengine.client.render.g2d.{Sprite, SpriteBatch}
 import org.jglr.phiengine.client.text.{FontFormat, FontRenderer, Font}
 import org.jglr.phiengine.client.ui.UI
@@ -43,7 +43,7 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
   override def init(config: PhiConfig): Unit = {
     batch = new SpriteBatch
     logo = new Texture("logo.png")
-    addInputProcessor(new TestInput(this))
+    addInputListener(new TestInput(this))
     setIcon(new FilePointer("icon64.png"))
     sprite = new Sprite(logo)
 
@@ -87,7 +87,7 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
     batch.end()
     lvlRenderer.render(delta)
     ui.render(delta)
-    font.renderString(engine.timer.getUPS + " UPS", 0, engine.getDisplayHeight()-font.font.getHeight('A')*2, 0,Colors.niceWhite)
-    font.renderString(engine.timer.getFPS + " FPS", 0, engine.getDisplayHeight()-font.font.getHeight('A'), 0,Colors.niceWhite)
+    font.renderString(engine.timer.getUPS + " UPS", 0, engine.getDisplayHeight-font.font.getHeight('A')*2, 0,Colors.niceWhite)
+    font.renderString(engine.timer.getFPS + " FPS", 0, engine.getDisplayHeight-font.font.getHeight('A'), 0,Colors.niceWhite)
   }
 }

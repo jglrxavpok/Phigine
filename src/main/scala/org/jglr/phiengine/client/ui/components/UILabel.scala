@@ -10,17 +10,19 @@ class UILabel(fontRenderer: FontRenderer, _text: String = "") extends UIComponen
   private var text: String = _text
   var color: Color = Colors.niceWhite
   var scale: Float = 1f
+  pack()
 
-  override def addChild(child: UIComponent): Unit = {
+  override def addChild(child: UIComponent, ignoreUpdating: Boolean = false): UIComponent = {
     throw new UnsupportedOperationException("UILabels can't have child components!")
   }
 
-  override def removeChild(child: UIComponent): Unit = {
+  override def removeChild(child: UIComponent, ignoreUpdating: Boolean = false): UIComponent = {
     throw new UnsupportedOperationException("UILabels can't have child components!")
   }
 
   def setText(newText: String) = {
     text = newText
+    pack()
   }
 
   def getText(): String = text
@@ -34,7 +36,6 @@ class UILabel(fontRenderer: FontRenderer, _text: String = "") extends UIComponen
     h = fontRenderer.font.getHeight(text)*scale
   }
 
-  pack()
 
   override def toString(): String = s"UILabel($text)"
 }

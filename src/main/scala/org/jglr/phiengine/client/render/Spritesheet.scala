@@ -23,7 +23,7 @@ class Spritesheet(val texture: Texture, val xFrequency: Int, val yFrequency: Int
   private def getCoords(x: Int, y: Int, texture: Texture): Vec2 = {
     val xpos: Float = x + 0.5f
     val ypos: Float = y + 0.5f
-    new Vec2(xpos / texture.getWidth().toFloat, ypos / texture.getHeight().toFloat)
+    new Vec2(xpos / texture.getWidth.toFloat, ypos / texture.getHeight.toFloat)
   }
 
   def getTexture: Texture = {
