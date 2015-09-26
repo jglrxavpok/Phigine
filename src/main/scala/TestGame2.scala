@@ -53,7 +53,7 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
     ent.addComponent(classOf[TestComponent])
     level.spawnEntity(ent)
 
-    font = new FontRenderer(FontRenderer.ASCII, Font.get("Consolas", 18, true))
+    font = new FontRenderer(FontRenderer.ASCII, Font.get("Consolas", 28, true))
     ui = new UI(font)
     val layout = new FlowLayout(ui, 5f, 5f, FlowLayout.CENTER)
     ui.layout = layout

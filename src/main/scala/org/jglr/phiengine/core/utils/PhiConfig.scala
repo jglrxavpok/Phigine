@@ -38,6 +38,11 @@ class PhiConfig {
   var loadShadersAtLaunch: Boolean = false
 
   /**
+   * Set to true in order to use the functionalities of Steam
+   */
+  var usesSteamAPI: Boolean = false
+
+  /**
    * Map containing all the program arguments, filled at start up.<br/>
    * This map is filled and used ''after'' processing of the other variables available in this class.<br/>
    * Engine-specific values can be found [[org.jglr.phiengine.core.EngineStart here]]<br/>

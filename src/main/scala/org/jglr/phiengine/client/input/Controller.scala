@@ -34,7 +34,8 @@ class Controller(val id: Int = 0) {
     throw new IllegalArgumentException("Cannot specify an id greater than " + GLFW_JOYSTICK_LAST + ", got " + id)
   }
 
-  poll()
+  if(id >= 0)
+    poll()
 
   def setListener(listener: ControllerListener) {
     this.listener = listener
@@ -45,6 +46,8 @@ class Controller(val id: Int = 0) {
   }
 
   def poll() {
+    if(id < 0)
+      return
     val wasConnected: Boolean = connected
     connected = glfwJoystickPresent(id) == GL11.GL_TRUE
     if (connected) name = glfwGetJoystickName(id)

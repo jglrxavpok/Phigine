@@ -5,6 +5,7 @@ import java.nio.charset.Charset
 import java.util
 import javax.imageio.ImageIO
 
+import com.codedisaster.steamworks.SteamAPI
 import com.google.common.base.Charsets
 import com.google.common.io.Files
 import com.google.gson._
@@ -206,6 +207,10 @@ class PhiEngine extends IDisposable {
         new Shader(s)
       }
     }
+    if(config.usesSteamAPI) {
+      displayLoadingStep("Loading Steam API...")
+      SteamNativesSetup.load(SystemUtils.getBaseFolder("Phingine"), logger)
+    }
     displayLoadingStep("Now loading timer")
     timer = new Timer
     timer.init
@@ -261,6 +266,9 @@ class PhiEngine extends IDisposable {
       }
       alpha = accumulator / interval
       render(alpha)
+      if (SteamAPI.isSteamRunning()) {
+        SteamAPI.runCallbacks();
+      }
       checkGLError("post rendering")
       window.swapBuffers
       window.pollEvents

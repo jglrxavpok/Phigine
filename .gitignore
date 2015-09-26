@@ -9,3 +9,6 @@ build/
 
 ## Debug files
 *_debug.*
+
+## Runtime files
+runtime/

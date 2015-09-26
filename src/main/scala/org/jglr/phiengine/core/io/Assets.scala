@@ -14,14 +14,16 @@ class Assets(engine: PhiEngine, game: Game) {
 
   def load(): Unit = {
     val gson: Gson = new Gson()
-    val content = file.strReadAll
-    val data = gson.fromJson(content, classOf[JsonObject])
     preload.put("textures", new util.ArrayList[FilePointer]())
     preload.put("shaders", new util.ArrayList[FilePointer]())
-    if(data.has("preload")) {
-      val preloadingData = data.getAsJsonObject("preload")
-      preload(preloadingData, "textures")
-      preload(preloadingData, "shaders")
+    if(file.exists) {
+      val content = file.strReadAll
+      val data = gson.fromJson(content, classOf[JsonObject])
+      if(data.has("preload")) {
+        val preloadingData = data.getAsJsonObject("preload")
+        preload(preloadingData, "textures")
+        preload(preloadingData, "shaders")
+      }
     }
   }
 
