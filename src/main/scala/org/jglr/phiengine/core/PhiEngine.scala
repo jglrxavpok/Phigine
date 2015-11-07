@@ -18,10 +18,11 @@ import org.jglr.phiengine.client.utils.{LWJGLSetup, Timer}
 import org.jglr.phiengine.core.game.Game
 import org.jglr.phiengine.core.io.{FileType, Assets, FilePointer}
 import org.jglr.phiengine.core.level.Level
-import org.jglr.phiengine.core.maths.Mat4
+import org.jglr.phiengine.core.maths.YepppNativesSetup
 import org.jglr.phiengine.core.utils._
 import org.jglr.phiengine.network.channels.PhiChannel
 import org.jglr.phiengine.network.{Server, NetworkSide, NetworkHandler}
+import org.joml.Matrix4f
 import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.Callbacks
 import org.lwjgl.glfw.GLFW
@@ -131,7 +132,6 @@ object PhiEngine {
 
 class PhiEngine extends IDisposable {
 
-
   private var logger: Logger = null
   var timer: Timer = null
   private var tickableRegistry: Registry[String, ITickable] = null
@@ -143,7 +143,7 @@ class PhiEngine extends IDisposable {
   private var inputHandler: InputHandler = null
   private var inputQueue: InputProcessorQueue = null
   private var stopKey: Input = null
-  private var projectionMatrix: Mat4 = null
+  private var projectionMatrix: Matrix4f = null
   private var networkHandler: NetworkHandler = null
   private var backgroundColor = Colors.black
   var autoUpdates: Boolean = false
@@ -153,6 +153,9 @@ class PhiEngine extends IDisposable {
   private var screenshotKey: Input = null
   private var takingScreenshot = false
 
+  // Rendering
+  private var mainFramebuffer: Framebuffer = null
+
   // Variables used to render text on loading
   private var loadingY = 0f
   private var loadingFontRenderer: FontRenderer = null
@@ -161,11 +164,17 @@ class PhiEngine extends IDisposable {
   private var loadingBatch: SpriteBatch = null
   var assets: Assets = null
 
+  // Everything related to Steamworks
+  private var usesSteamworks = false
+
+  // Stuff related to natives handling
+  var nativesFolder: File = null
+
   PhiEngine.instance = this
 
   def autoUpdate(tickable: ITickable) = {
     if(autoUpdates)
-      tickableQueue.add(tickable)
+    tickableQueue.add(tickable)
   }
 
   def stopAutoUpdate(tickable: ITickable): Unit = {
@@ -179,12 +188,13 @@ class PhiEngine extends IDisposable {
   def init(game: Game, config: PhiConfig) {
     EngineStart.handle(this, config)
     assets = new Assets(this, game)
-    setProjectionMatrix(new Mat4().orthographic(0, getDisplayWidth, getDisplayHeight, 0, -100, 100))
+    setProjectionMatrix(new Matrix4f().setOrtho(0, getDisplayWidth, getDisplayHeight, 0, -100, 100))
     logger = LoggerFactory.getLogger(game.getName)
-    logger.info("Loading Phingine "+PhiEngine.getVersion)
+    logger.info("Loading Phigine "+PhiEngine.getVersion)
     tickableRegistry = new Registry[String, ITickable]
     this.game = game
     initLJWGL(config)
+    YepppNativesSetup.load(nativesFolder, logger)
     loadingFontRenderer = new FontRenderer(FontRenderer.ASCII, Font.get("Consolas", 18, antialias = false))
     loadingBatch = loadingFontRenderer.batch
     logo = new Texture("logo.png")
@@ -209,14 +219,15 @@ class PhiEngine extends IDisposable {
     }
     if(config.usesSteamAPI) {
       displayLoadingStep("Loading Steam API...")
-      SteamNativesSetup.load(SystemUtils.getBaseFolder("Phingine"), logger)
+      SteamNativesSetup.load(nativesFolder, logger)
+      usesSteamworks = true
     }
     displayLoadingStep("Now loading timer")
     timer = new Timer
     timer.init
     displayLoadingStep("Now loading network code")
     networkHandler = new NetworkHandler(this)
-    networkHandler.registerChannel("PhiEngine", new PhiChannel(NetworkSide.CLIENT))
+    networkHandler.registerChannel("Phigine", new PhiChannel(NetworkSide.CLIENT))
     val server: Server = networkHandler.newServer
     displayLoadingStep("Now loading "+game.getName)
     game.init(config)
@@ -228,7 +239,7 @@ class PhiEngine extends IDisposable {
 
   def displayLoadingStep(text: String): Unit = {
     if(running)
-      return
+    return
     loadingBatch.begin()
     loadingBatch.draw(logo, displayWidth-logo.getWidth, 0, 0)
     if(game.getLogo != null) {
@@ -266,8 +277,8 @@ class PhiEngine extends IDisposable {
       }
       alpha = accumulator / interval
       render(alpha)
-      if (SteamAPI.isSteamRunning()) {
-        SteamAPI.runCallbacks();
+      if (usesSteamworks && SteamAPI.isSteamRunning) {
+        SteamAPI.runCallbacks()
       }
       checkGLError("post rendering")
       window.swapBuffers
@@ -290,7 +301,7 @@ class PhiEngine extends IDisposable {
       val tickable = tickableRemovalQueue.remove(0)
       tickableRegistry.delete(tickable.toString)
     }
-    tickableRegistry.foreachValue((t: ITickable) => t.tick(delta))
+    tickableRegistry.foreachValue((t: ITickable) => if(t.shouldAutoUpdate) t.tick(delta))
   }
 
   private def pollEvents() {
@@ -311,14 +322,19 @@ class PhiEngine extends IDisposable {
   }
 
   private def render(alpha: Float) {
+    glClearStencil(0)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
+    mainFramebuffer.bind()
     glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
     game.render(alpha)
+    mainFramebuffer.unbind()
+    mainFramebuffer.copyToWindow()
   }
 
   private def initLJWGL(config: PhiConfig) {
     try {
-      LWJGLSetup.load(SystemUtils.getBaseFolder("Phingine"), logger)
+      LWJGLSetup.load(nativesFolder, logger)
       GLFW.glfwSetErrorCallback(Callbacks.errorCallbackPrint)
       if (glfwInit == GL_FALSE) {
         PhiEngine.crash("GLFW could not be init... ;c")
@@ -357,6 +373,7 @@ class PhiEngine extends IDisposable {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
       glEnable(GL_DEPTH_TEST)
       glDepthFunc(GL_LEQUAL)
+      mainFramebuffer = new Framebuffer(displayWidth, displayHeight)
     }
     catch {
       case e: IOException => {
@@ -450,11 +467,11 @@ class PhiEngine extends IDisposable {
     inputHandler.getMouseMoveListeners.add(input)
   }
 
-  def getProjectionMatrix: Mat4 = {
+  def getProjectionMatrix: Matrix4f = {
     projectionMatrix
   }
 
-  def setProjectionMatrix(projectionMatrix: Mat4) {
+  def setProjectionMatrix(projectionMatrix: Matrix4f) {
     this.projectionMatrix = projectionMatrix
   }
 
@@ -492,4 +509,14 @@ class PhiEngine extends IDisposable {
     }
     ImageIO.write(screenshot, "png", new File(".", "screenshot_"+timer.getTime+".png"))
   }
+
+  def grabMouse(): Unit = {
+    glfwSetInputMode(window.getPointer, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+  }
+
+  def ungrabMouse(): Unit = {
+    glfwSetInputMode(window.getPointer, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
+  }
+
+  def getMainFrameBuffer: Framebuffer = mainFramebuffer
 }

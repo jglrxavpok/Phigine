@@ -25,7 +25,7 @@ class UILabel(fontRenderer: FontRenderer, _text: String = "") extends UIComponen
     pack()
   }
 
-  def getText(): String = text
+  def getText: String = text
 
   override def renderSelf(delta: Float, batch: SpriteBatch) = {
     fontRenderer.renderString(text, x, y, z, color, scale)
@@ -37,5 +37,5 @@ class UILabel(fontRenderer: FontRenderer, _text: String = "") extends UIComponen
   }
 
 
-  override def toString(): String = s"UILabel($text)"
+  override def toString: String = "UILabel("+'"'+text+'"'+")"
 }

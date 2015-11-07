@@ -79,6 +79,10 @@ class Sprite(var texture: Texture, var region: TextureRegion = new TextureRegion
     rotationCenterY = y
   }
 
+  def setCentered(x: Float, y: Float): Unit = {
+    setPosition(x+width*scale/2f, y+height*scale/2f)
+  }
+
   def draw(batch: SpriteBatch) {
     val bottomLeft: Vec2 = new Vec2(0, 0)
     val topLeft: Vec2 = new Vec2(0, height * scale)
@@ -101,6 +105,7 @@ class Sprite(var texture: Texture, var region: TextureRegion = new TextureRegion
     batch.addIndex(1)
     batch.addIndex(0)
     batch.addIndex(2)
+
     batch.addIndex(2)
     batch.addIndex(0)
     batch.addIndex(3)

@@ -77,7 +77,7 @@ class FontRenderer(val supportedChars: Array[Char], _font: Font = null) {
       if(drawChar(c, posX, posY, z, batch, color, scale))
         posX += font.getWidth(c)*scale
     }
-    if(!wasDrawing)
+   if(!wasDrawing)
       batch.end()
   }
 

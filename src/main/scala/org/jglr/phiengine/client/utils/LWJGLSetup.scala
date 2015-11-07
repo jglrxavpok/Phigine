@@ -6,7 +6,7 @@ import java.util._
 import java.util.regex._
 import com.google.common.collect._
 import org.jglr.phiengine.core.utils.OperatingSystem.Type
-import org.jglr.phiengine.core.utils.{StringUtils, SystemUtils, IOUtils, OperatingSystem}
+import org.jglr.phiengine.core.utils._
 import org.slf4j._
 
 object LWJGLSetup extends NativesSetup {
@@ -31,4 +31,11 @@ object LWJGLSetup extends NativesSetup {
 
     nativesMap
   }
+
+  /**
+   * If this does not return <code>null</code>, the setup will create a subfolder with the name returned inside the provided natives folder
+   * @return
+   * The subfolder name, if any. Null otherwise
+   */
+  override protected def getSubfolderName: String = "lwjgl"
 }

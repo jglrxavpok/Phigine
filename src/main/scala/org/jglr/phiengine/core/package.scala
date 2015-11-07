@@ -1,7 +1,9 @@
 package org.jglr.phiengine
 
+import java.io.File
+
 import org.jglr.phiengine.client.render.{Textures, Shaders}
-import org.jglr.phiengine.core.utils.PhiConfig
+import org.jglr.phiengine.core.utils.{SystemUtils, PhiConfig}
 
 package object core {
 
@@ -35,6 +37,7 @@ package object core {
       engine.autoUpdates = config.autoUpdates
       engine.displayWidth = config.width
       engine.displayHeight = config.height
+      engine.nativesFolder = new File(config.getUserDefined("nativesFolder", new File(SystemUtils.getBaseFolder("Phigine"), "natives").getAbsolutePath))
       Shaders.shouldCache = !config.lazyShaders
       Textures.shouldCache = !config.lazyTextures
       outputShaderList(config("outputShaderList"))

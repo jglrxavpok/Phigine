@@ -65,7 +65,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   private var updating = false
 
   def addChild(child: UIComponent, ignoreUpdating: Boolean = false): UIComponent = {
-    if(!ignoreUpdating || !updating) {
+    if(ignoreUpdating || !updating) {
       if (children.add(child) && layout != null)
         layout.onComponentAdded(child)
     } else {
@@ -87,7 +87,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   }
 
   def removeChild(child: UIComponent, ignoreUpdating: Boolean = false): UIComponent = {
-    if(!ignoreUpdating || !updating) {
+    if(ignoreUpdating || !updating) {
       if(children.remove(child) && layout != null)
         layout.onComponentRemoved(child)
     } else {
@@ -360,6 +360,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
       "Empty"
     } else {
       val builder = new StringBuilder()
+      builder.append(getClass.getSimpleName).append("[")
       var first = true
       for(c <- children) {
         if(!first)
@@ -367,6 +368,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
         first = false
         builder.append(c.toString)
       }
+      builder.append("]")
       builder.toString()
     }
   }

@@ -2,8 +2,8 @@ package org.jglr.phiengine.client.render
 
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.FilePointer
-import org.jglr.phiengine.core.maths.Mat4
 import org.jglr.phiengine.core.utils.Registry
+import org.joml.Matrix4f
 import org.lwjgl.BufferUtils
 import java.io.IOException
 import java.nio.FloatBuffer
@@ -28,10 +28,11 @@ object Shaders {
 }
 
 class ShaderHandle(shader: FilePointer) {
-  private final val uniforms: List[Uniform] = new ArrayList
-  private final val locations: Map[String, Int] = new HashMap
-  private final val id: Int = glCreateProgram
-  private final val path: FilePointer = shader
+  private val identityMat = new Matrix4f().identity()
+  private val uniforms: List[Uniform] = new ArrayList
+  private val locations: Map[String, Int] = new HashMap
+  private val id: Int = glCreateProgram
+  private val path: FilePointer = shader
   private val registry: Registry[String, String] = new Registry[String, String]
 
   val vertexID: Int = compile(shader, GL_VERTEX_SHADER)
@@ -41,6 +42,13 @@ class ShaderHandle(shader: FilePointer) {
   glAttachShader(id, vertexID)
   glAttachShader(id, fragID)
   glLinkProgram(id)
+  bind()
+  uniforms.forEach((u: Uniform) => {
+    if (u.uniformType.equals("mat4")) {
+      setUniformMat4(u.name, identityMat)
+    }
+  })
+  unbind()
   if (glGetProgrami(id, GL_LINK_STATUS) == 0) {
     PhiEngine.getInstance.getLogger.error("Failed to link shader \n" + glGetProgramInfoLog(id))
   }
@@ -56,6 +64,8 @@ class ShaderHandle(shader: FilePointer) {
         setUniformMat4(u.name, PhiEngine.getInstance.getProjectionMatrix)
       } else if (u.name.equals("u_time")) {
         setUniformd(u.name, PhiEngine.getInstance.getTime)
+      } else if (u.name.equals("u_modelview")) {
+        setUniformMat4(u.name, identityMat)
       }
     })
   }
@@ -154,11 +164,10 @@ class ShaderHandle(shader: FilePointer) {
     result
   }
 
-  def setUniformMat4(name: String, m: Mat4) {
+  def setUniformMat4(name: String, m: Matrix4f) {
     val loc: Int = getLocation(name)
     val buffer: FloatBuffer = BufferUtils.createFloatBuffer(16)
-    m.write(buffer)
-    buffer.flip
+    m.get(buffer).position(16).flip()
     glUniformMatrix4fv(loc, false, buffer)
   }
 
@@ -178,6 +187,21 @@ class ShaderHandle(shader: FilePointer) {
   def setUniformf(name: String, value: Float) {
     val loc: Int = getLocation(name)
     if (loc != -1) glUniform1f(loc, value)
+  }
+
+  def setUniform2f(name: String, x: Float, y: Float) {
+    val loc: Int = getLocation(name)
+    if (loc != -1) glUniform2f(loc, x, y)
+  }
+
+  def setUniform3f(name: String, x: Float, y: Float, z: Float) {
+    val loc: Int = getLocation(name)
+    if (loc != -1) glUniform3f(loc, x, y, z)
+  }
+
+  def setUniform4f(name: String, x: Float, y: Float, z: Float, w: Float) {
+    val loc: Int = getLocation(name)
+    if (loc != -1) glUniform4f(loc, x, y, z, w)
   }
 
   def setUniformi(name: String, value: Int) {
@@ -213,6 +237,7 @@ class ShaderHandle(shader: FilePointer) {
 
 @throws(classOf[IOException])
 class Shader(shader: FilePointer) {
+
   val handle: ShaderHandle =
     if(Shaders.shouldCache) {
       if(Shaders.cache.containsKey(shader)) {
@@ -238,7 +263,19 @@ class Shader(shader: FilePointer) {
     handle.setUniformd(name, value)
   }
 
-  def setUniformMat4(name: String, m: Mat4) {
+  def setUniform2f(name: String, x: Float, y: Float) {
+    handle.setUniform2f(name, x, y)
+  }
+
+  def setUniform3f(name: String, x: Float, y: Float, z: Float) {
+    handle.setUniform3f(name, x, y, z)
+  }
+
+  def setUniform4f(name: String, x: Float, y: Float, z: Float, a: Float) {
+    handle.setUniform4f(name, x, y, z, a)
+  }
+
+  def setUniformMat4(name: String, m: Matrix4f) {
     handle.setUniformMat4(name, m)
   }
 

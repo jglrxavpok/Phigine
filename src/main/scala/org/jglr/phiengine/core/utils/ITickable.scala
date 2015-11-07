@@ -10,4 +10,6 @@ trait ITickable {
    *              The time in milliseconds between the last two frames
    */
   def tick(delta: Float)
+
+  var shouldAutoUpdate: Boolean = true
 }

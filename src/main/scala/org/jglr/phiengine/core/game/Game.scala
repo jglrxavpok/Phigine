@@ -4,8 +4,8 @@ import org.jglr.phiengine.client.input.{InputListener, InputProcessor}
 import org.jglr.phiengine.client.render.{Texture, Color}
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.FilePointer
-import org.jglr.phiengine.core.maths.Mat4
 import org.jglr.phiengine.core.utils.PhiConfig
+import org.joml.Matrix4f
 
 /**
  * Base class for Phingine games, Game provides convenience methods to change the engine's state, and update and render itself
@@ -52,7 +52,7 @@ abstract class Game(val engine: PhiEngine) {
    * @param m
    *          The projection matrix
    */
-  def setProjectionMatrix(m: Mat4) {
+  def setProjectionMatrix(m: Matrix4f) {
     engine.setProjectionMatrix(m)
   }
 
@@ -97,4 +97,9 @@ abstract class Game(val engine: PhiEngine) {
    *         The game ID
    */
   def id: String = getName
+
+  def grabMouse(): Unit = engine.grabMouse()
+
+  def ungrabMouse(): Unit = engine.ungrabMouse()
+
 }

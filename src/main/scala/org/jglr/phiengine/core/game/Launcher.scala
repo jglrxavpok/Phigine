@@ -3,6 +3,10 @@ package org.jglr.phiengine.core.game
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.utils.PhiConfig
 
+object LauncherUtils {
+  def getWidthFromRatio(height: Int, ratio: Float): Int = (height*ratio).toInt
+}
+
 class Launcher(val gameClass: Class[_<:Game], f: PhiConfig => Unit = config => {}) extends App {
   val config = new PhiConfig
   f(config)

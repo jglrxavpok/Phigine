@@ -1,16 +1,18 @@
 package org.jglr.phiengine.client.render
 
 import org.jglr.phiengine.core.PhiEngine
-import org.jglr.phiengine.core.maths.{Vec3, Mat4}
 import org.jglr.phiengine.core.utils.ITickable
+import org.joml.{Matrix4f, Quaternionf, Vector3f}
 
-abstract class Camera(protected val projectionMatrix: Mat4) extends ITickable {
+class Camera(protected val projectionMatrix: Matrix4f) extends ITickable {
 
-  val position: Vec3 = new Vec3
+  val position: Vector3f = new Vector3f
+  val rotation: Quaternionf = new Quaternionf().identity()
 
-  protected val viewMatrix = new Mat4().identity
-  private val combined = new Mat4().identity
-  protected val translationMatrix = new Mat4().identity
+  protected val viewMatrix = new Matrix4f().identity
+  private val combined = new Matrix4f().identity
+  protected val translationMatrix = new Matrix4f().identity
+  protected val rotationMatrix = new Matrix4f().identity
 
   /**
    * Ticks this object<hr/>
@@ -20,13 +22,14 @@ abstract class Camera(protected val projectionMatrix: Mat4) extends ITickable {
    */
   override def tick(delta: Float): Unit = {
     viewMatrix.identity
-    translationMatrix.translation(position.x, position.y, position.z)
+    translationMatrix.translation(-position.x, -position.y, -position.z)
+    rotationMatrix.rotation(rotation)
     modifyView()
-    combined.set(projectionMatrix) *= viewMatrix
+    projectionMatrix.mul(viewMatrix, combined)
     PhiEngine.getInstance.setProjectionMatrix(combined)
   }
 
   def modifyView(): Unit = {
-    viewMatrix *= translationMatrix
+    viewMatrix.mul(rotationMatrix.mul(translationMatrix))
   }
 }

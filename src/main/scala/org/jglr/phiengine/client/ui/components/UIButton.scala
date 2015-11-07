@@ -34,7 +34,7 @@ class UIButton(fontRenderer: FontRenderer, text: String = null) extends UICompon
 
   if(text != null) {
     val label = new UILabel(fontRenderer, text)
-    label.color = Colors.lightGray lighter()
+    label.color = Colors.white//Colors.lightGray lighter()
     addChild(label)
     pack()
   }
@@ -132,5 +132,4 @@ class UIButton(fontRenderer: FontRenderer, text: String = null) extends UICompon
     super.onButtonReleased(controller, buttonCode)
   }
 
-  override def toString: String = s"UIButton(${super.toString})"
 }

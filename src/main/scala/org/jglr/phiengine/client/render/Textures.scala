@@ -103,7 +103,7 @@ class TextureHandle(pointer: FilePointer, filter: Int, _img: BufferedImage = nul
     y -= 1;
   }
   buffer.flip
-  private val texID = glGenTextures
+  val texID = glGenTextures
   bind()
   glTexParameteri(GL_TEXTURE_2D, GL12.GL_TEXTURE_BASE_LEVEL, 0)
   glTexParameteri(GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, 0)

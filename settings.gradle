@@ -1,2 +1,4 @@
 rootProject.name = 'phigine'
+include '../../APIs/DMX'
+findProject(':../../APIs/DMX')?.name = 'dmx-loader'
 

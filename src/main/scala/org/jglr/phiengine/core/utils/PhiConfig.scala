@@ -3,7 +3,7 @@ package org.jglr.phiengine.core.utils
 import java.util
 
 /**
- * Helper class used to configurate Phingine at launch
+ * Helper class used to configurate Phigine at launch
  */
 class PhiConfig {
   var autoUpdates: Boolean = false

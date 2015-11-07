@@ -5,7 +5,6 @@ import java.util
 import java.util._
 
 import com.codedisaster.steamworks.{SteamException, SteamAPI}
-import org.jglr.phiengine.client.utils.NativesSetup
 import org.jglr.phiengine.core.utils.OperatingSystem.Type
 import org.slf4j._
 
@@ -38,4 +37,11 @@ object SteamNativesSetup extends NativesSetup {
 
     nativesMap
   }
+
+  /**
+   * If this does not return <code>null</code>, the setup will create a subfolder with the name returned inside the provided natives folder
+   * @return
+   * The subfolder name, if any. Null otherwise
+   */
+  override protected def getSubfolderName: String = "steamworks"
 }
