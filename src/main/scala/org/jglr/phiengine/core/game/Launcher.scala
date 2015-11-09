@@ -1,7 +1,9 @@
 package org.jglr.phiengine.core.game
 
+import java.util.function.Consumer
+
 import org.jglr.phiengine.core.PhiEngine
-import org.jglr.phiengine.core.utils.PhiConfig
+import org.jglr.phiengine.core.utils.{JavaConversions, PhiConfig}
 
 object LauncherUtils {
   def getWidthFromRatio(height: Int, ratio: Float): Int = (height*ratio).toInt
@@ -30,4 +32,8 @@ class Launcher(val gameClass: Class[_<:Game], f: PhiConfig => Unit = config => {
     }
   }
   PhiEngine.start(gameClass, config)
+
+  def this(gameClass: Class[_<:Game], func: java.util.function.Function[PhiConfig, Unit]) {
+    this(gameClass, JavaConversions.toScalaFunction(func))
+  }
 }

@@ -8,6 +8,11 @@ import java.util.Comparator
  */
 object JavaConversions {
 
+  implicit def toScalaFunction[A, B](f: JFunction[A, B]) = {
+    a: A =>
+      f.apply(a)
+  }
+
   implicit def toJavaFunction[A, B](f: (A) => B) = new JFunction[A, B] {
     override def apply(a: A): B = f(a)
   }
