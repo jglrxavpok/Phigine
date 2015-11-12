@@ -72,7 +72,7 @@ object PhiEngine {
     builder.append(indent).append("[==== Engine Infos ====]\n")
     builder.append(indent).append(indent).append(s"Engine version: $version\n")
     builder.append(indent).append("[==== Game Infos ====]\n")
-    if (PhiEngine.getInstance != null) builder.append(indent).append(indent).append("Game Name: ").append(PhiEngine.getInstance.game.getName).append("\n")
+    if (PhiEngine.getInstance != null && PhiEngine.getInstance.game != null) builder.append(indent).append(indent).append("Game Name: ").append(PhiEngine.getInstance.game.getName).append("\n")
     else builder.append(indent).append(indent).append("Game Name: UNKNOWN\n")
     System.err.println(builder.toString())
     forceExit(-1)
@@ -186,11 +186,11 @@ class PhiEngine extends IDisposable {
   }
 
   def init(game: Game, config: PhiConfig) {
+    logger = LoggerFactory.getLogger(game.getName)
+    logger.info("Loading Phigine "+PhiEngine.getVersion)
     EngineStart.handle(this, config)
     assets = new Assets(this, game)
     setProjectionMatrix(new Matrix4f().setOrtho(0, getDisplayWidth, getDisplayHeight, 0, -100, 100))
-    logger = LoggerFactory.getLogger(game.getName)
-    logger.info("Loading Phigine "+PhiEngine.getVersion)
     tickableRegistry = new Registry[String, ITickable]
     this.game = game
     initLJWGL(config)

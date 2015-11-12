@@ -2,6 +2,7 @@ package org.jglr.phiengine
 
 import java.io.File
 
+import org.jglr.phiengine.client.ClientEngineSettings
 import org.jglr.phiengine.client.render.{Textures, Shaders}
 import org.jglr.phiengine.core.utils.{SystemUtils, PhiConfig}
 
@@ -42,6 +43,9 @@ package object core {
       Textures.shouldCache = !config.lazyTextures
       outputShaderList(config("outputShaderList"))
       outputTextureList(config("outputTextureList"))
+      ClientEngineSettings.disallowMeshCaching = config("disableMeshCache")
+      if(config("disableMeshCache"))
+        PhiEngine.getInstance.getLogger.warn("Mesh caching is disabled, this can lead to memory leaks and framerate issues!")
     }
   }
 }
