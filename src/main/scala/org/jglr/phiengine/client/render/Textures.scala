@@ -76,7 +76,12 @@ class TextureHandle(pointer: FilePointer, filter: Int, _img: BufferedImage = nul
         case e: Exception =>
           e.printStackTrace()
           PhiEngine.getInstance.getLogger.error("Could not find texture " + pointer + ", loading placeholder texture instead!")
-          new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB)
+          val placeholder = new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB)
+          placeholder.setRGB(0,0,0xFFFFFFFF)
+          placeholder.setRGB(1,1,0xFFFFFFFF)
+          placeholder.setRGB(0,1,0xFF000000)
+          placeholder.setRGB(1,0,0xFF000000)
+          placeholder
       }
     }
     else {

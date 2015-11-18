@@ -15,6 +15,8 @@ class Mesh(verticesNumber: Int, indicesNumber: Int) {
   private var count: Int = 0
 
   val vertexSize: Int = 3 + 2 + 4
+  var defaultDrawMode = GL_TRIANGLES
+
   checkGLError("mesh init: creating buffers")
   glBindVertexArray(id)
   glBindBuffer(GL_ARRAY_BUFFER, verticesBuffer)
@@ -52,7 +54,7 @@ class Mesh(verticesNumber: Int, indicesNumber: Int) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer)
   }
 
-  def render(drawingMode: Int = GL_TRIANGLES) {
+  def render(drawingMode: Int = defaultDrawMode) {
     PhiEngine.getInstance.checkGLError("before rendering a mesh")
     glDrawElements(drawingMode, count, GL_UNSIGNED_INT, 0)
     PhiEngine.getInstance.checkGLError("after rendering a mesh")

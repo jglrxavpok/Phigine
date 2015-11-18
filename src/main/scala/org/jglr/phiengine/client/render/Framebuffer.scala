@@ -14,36 +14,34 @@ import org.lwjgl.opengl.GL15._
 import org.lwjgl.opengl.GL20._
 import org.lwjgl.opengl.GL30._
 
-private object Framebuffer {
+object Framebuffer {
   def createFromResolution(w: Int, h: Int): Texture = {
     new Texture(new FilePointer(s"resolution${w}x$h "+Math.random(), FileType.VIRTUAL), GL_NEAREST, new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB))
   }
+
+  def createUsualFramebufferBuffer(w: Int, h: Int): Framebuffer = new Framebuffer(w, h, null: Texture)
 }
 
-class Framebuffer(val w: Int = ui.width, val h: Int = ui.height, _colorTexture: Texture = null) {
+class Framebuffer(val w: Int, val h: Int, val attachments: FramebufferAttachment*) {
 
   private var previous: Int = 0
 
-  val colorTexture = if(_colorTexture == null) {
-    Framebuffer.createFromResolution(w, h)
-  } else {
-    _colorTexture
+  def this(w: Int, h: Int, _colorTexture: Texture = null) = {
+    this(w, h, new TextureAttachment(0,_colorTexture), new DepthStencilAttachment(w, h))
   }
 
-  val depthTextureId = glGenTextures()
-  glBindTexture(GL_TEXTURE_2D, depthTextureId)
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, w, h, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, null.asInstanceOf[ByteBuffer])
-  glBindTexture(GL_TEXTURE_2D, 0)
-
   val id = glGenFramebuffers()
-  glBindFramebuffer(GL_FRAMEBUFFER, id)
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture.handle.texID, 0)
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTextureId, 0)
+  bind()
+
+  val drawBuffers = Array.newBuilder[Int]
+  var drawIndex = 0
+  for(attach <- attachments) {
+    glFramebufferTexture2D(GL_FRAMEBUFFER, attach.getTypeID, attach.getTarget, attach.getTextureID, attach.getLevel)
+    if(attach.isDrawBuffer) {
+      drawBuffers += attach.getTypeID
+    }
+  }
+  glDrawBuffers(Buffers.wrapInt(drawBuffers.result()))
 
   val status = glCheckFramebufferStatus(GL_FRAMEBUFFER)
   if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -66,7 +64,7 @@ class Framebuffer(val w: Int = ui.width, val h: Int = ui.height, _colorTexture: 
     }
   }
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0)
+  unbind()
 
   def bind(): Unit = {
     previous = glGetInteger(GL_FRAMEBUFFER_BINDING)

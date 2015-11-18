@@ -27,7 +27,7 @@ import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.Callbacks
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFWvidmode
-import org.lwjgl.opengl.{GL11, GLContext}
+import org.lwjgl.opengl.{GL30, GL20, GL11, GLContext}
 import org.lwjgl.system.MemoryUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -321,7 +321,7 @@ class PhiEngine extends IDisposable {
     game.pollEvents()
   }
 
-  private def render(alpha: Float) {
+  private def renderGeometry(alpha: Float) = {
     glClearStencil(0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
     mainFramebuffer.bind()
@@ -330,6 +330,11 @@ class PhiEngine extends IDisposable {
     game.render(alpha)
     mainFramebuffer.unbind()
     mainFramebuffer.copyToWindow()
+  }
+
+  private def render(alpha: Float) {
+    renderGeometry(alpha)
+//    renderLighting(alpha)
   }
 
   private def initLJWGL(config: PhiConfig) {
@@ -373,7 +378,7 @@ class PhiEngine extends IDisposable {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
       glEnable(GL_DEPTH_TEST)
       glDepthFunc(GL_LEQUAL)
-      mainFramebuffer = new Framebuffer(displayWidth, displayHeight)
+      mainFramebuffer = Framebuffer.createUsualFramebufferBuffer(displayWidth, displayHeight)
     }
     catch {
       case e: IOException => {
