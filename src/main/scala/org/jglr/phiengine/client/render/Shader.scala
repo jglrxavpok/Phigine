@@ -1,5 +1,7 @@
 package org.jglr.phiengine.client.render
 
+import java.util
+
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.FilePointer
 import org.jglr.phiengine.core.utils.Registry
@@ -10,6 +12,7 @@ import java.nio.FloatBuffer
 import java.util.{Map, List, HashMap, ArrayList}
 import java.util.Set
 import java.util.Stack
+import org.lwjgl.opengl.GL11._
 import org.lwjgl.opengl.GL20._
 import org.lwjgl.opengl.GL32._
 import org.lwjgl.opengl.GL43._
@@ -19,18 +22,19 @@ import org.jglr.phiengine.core.utils.JavaConversions._
 object Shaders {
   val POS_INDEX: Int = 0
   val UV_INDEX: Int = 1
-  val COLOR_INDEX: Int = 2
+  val NORMAL_INDEX: Int = 2
+  val COLOR_INDEX: Int = 3
 
   var outputList = false
   var shouldCache = false
 
-  var cache = new HashMap[FilePointer, ShaderHandle]
+  var cache = new util.HashMap[FilePointer, ShaderHandle]
 }
 
 class ShaderHandle(shader: FilePointer) {
   private val identityMat = new Matrix4f().identity()
-  private val uniforms: List[Uniform] = new ArrayList
-  private val locations: Map[String, Int] = new HashMap
+  private val uniforms: util.List[Uniform] = new util.ArrayList
+  private val locations: util.Map[String, Int] = new util.HashMap
   private val id: Int = glCreateProgram
   private val path: FilePointer = shader
   private val registry: Registry[String, String] = new Registry[String, String]
@@ -97,7 +101,7 @@ class ShaderHandle(shader: FilePointer) {
   private def preprocess(source: String): String = {
     val builder: StringBuilder = new StringBuilder
     val lines: Array[String] = source.replace("\r", "").split("\n")
-    val conditions: Stack[Boolean] = new Stack
+    val conditions: util.Stack[Boolean] = new util.Stack
     conditions.push(true)
     for (line <- lines) {
       val shouldRead: Boolean = conditions.peek
@@ -126,7 +130,7 @@ class ShaderHandle(shader: FilePointer) {
           define(arg, value)
         } else if (command.startsWith("endif")) {
           conditions.pop
-        } else if (command.startsWith("include ")) {
+        } else if (command.startsWith("include ") && shouldRead) {
           val arg: String = command.substring("include ".length)
           val toInclude: FilePointer = path.relative(arg)
           PhiEngine.getInstance.getLogger.info("Including shader file "+toInclude+" inside "+path)
@@ -156,8 +160,8 @@ class ShaderHandle(shader: FilePointer) {
   }
 
   private def replaceDefined(line: String): String = {
-    val keys: Set[String] = registry.keySet
-    var result: String = line;
+    val keys: util.Set[String] = registry.keySet
+    var result: String = line
     for (k <- keys) {
       result = result.replace(k, get(k))
     }
@@ -238,6 +242,8 @@ class ShaderHandle(shader: FilePointer) {
 @throws(classOf[IOException])
 class Shader(shader: FilePointer) {
 
+  private var previous: Int = 0
+
   val handle: ShaderHandle =
     if(Shaders.shouldCache) {
       if(Shaders.cache.containsKey(shader)) {
@@ -280,6 +286,7 @@ class Shader(shader: FilePointer) {
   }
 
   def bind(): Unit = {
+    previous = glGetInteger(GL_CURRENT_PROGRAM)
     handle.bind()
   }
 
@@ -288,7 +295,7 @@ class Shader(shader: FilePointer) {
   }
 
   def unbind() {
-    glUseProgram(0)
+    glUseProgram(previous)
   }
 }
 

@@ -49,4 +49,5 @@ object MathHelper {
     info.yeppp.Math.Cos_V64f_V64f(angles, 0, result, 0, 1)
     result(0)
   }
+
 }

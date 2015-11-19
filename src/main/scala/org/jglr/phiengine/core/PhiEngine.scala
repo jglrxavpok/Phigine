@@ -11,6 +11,7 @@ import com.google.common.io.Files
 import com.google.gson._
 import org.jglr.phiengine.client.WindowPointer
 import org.jglr.phiengine.client.input._
+import org.jglr.phiengine.client.render.deferred.{GBufferAttachs, GBuffer}
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.render._
 import org.jglr.phiengine.client.text.{FontFormat, Font, FontRenderer}
@@ -36,6 +37,8 @@ import java.lang.reflect.Constructor
 import org.lwjgl.glfw.GLFW._
 import org.lwjgl.opengl.GL11._
 import org.jglr.phiengine.core.utils.JavaConversions._
+
+import org.lwjgl.opengl.GL30._
 
 import scala.collection.JavaConversions._
 
@@ -154,7 +157,8 @@ class PhiEngine extends IDisposable {
   private var takingScreenshot = false
 
   // Rendering
-  private var mainFramebuffer: Framebuffer = null
+  private var mainFramebuffer: GBuffer = null
+  private var geometryShader: Shader = null
 
   // Variables used to render text on loading
   private var loadingY = 0f
@@ -321,20 +325,29 @@ class PhiEngine extends IDisposable {
     game.pollEvents()
   }
 
-  private def renderGeometry(alpha: Float) = {
+  private def performGeometryPass(alpha: Float) = {
     glClearStencil(0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
     mainFramebuffer.bind()
+    geometryShader.bind()
     glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
     game.render(alpha)
     mainFramebuffer.unbind()
-    mainFramebuffer.copyToWindow()
+    geometryShader.unbind()
+  }
+
+  private def performLightingPass(alpha: Float): Unit = {
+    for(i <- 0 until 4) {
+      val x: Int = ((i % 2) * (displayWidth/2f)).toInt
+      val y: Int = (((4-i-1) / 2) * (displayHeight/2f)).toInt
+      mainFramebuffer.copyToWindowArea(GL_COLOR_ATTACHMENT0+i, x, y, displayWidth/2, displayHeight/2)
+    }
   }
 
   private def render(alpha: Float) {
-    renderGeometry(alpha)
-//    renderLighting(alpha)
+    performGeometryPass(alpha)
+    performLightingPass(alpha)
   }
 
   private def initLJWGL(config: PhiConfig) {
@@ -378,7 +391,8 @@ class PhiEngine extends IDisposable {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
       glEnable(GL_DEPTH_TEST)
       glDepthFunc(GL_LEQUAL)
-      mainFramebuffer = Framebuffer.createUsualFramebufferBuffer(displayWidth, displayHeight)
+      mainFramebuffer = new GBuffer(displayWidth, displayHeight)
+      geometryShader = new Shader("assets/shaders/passes/geometry.glsl")
     }
     catch {
       case e: IOException => {

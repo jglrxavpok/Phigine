@@ -1,24 +1,31 @@
 package org.jglr.phiengine.client.render
 
 import org.jglr.phiengine.client.render.g2d.Batch
+import org.jglr.phiengine.core.maths.Vector3fExtensions._
 import org.joml.{Vector2f, Vector3f}
 
 object TemplateMeshes {
 
-  def toFloats(vertices: Array[Vector3f], uvs: Array[Vector2f]): Array[Float] = {
-    val arr = new Array[Float](vertices.length*Batch.vertexSize)
+  def toFloats(vertices: Array[Vector3f], uvs: Array[Vector2f], normals: Array[Vector3f]): Array[Float] = {
+    val arr = new Array[Float](vertices.length*MeshUtils.vertexSize)
     for(i <- vertices.indices) {
-      arr(i*Batch.vertexSize+0) = vertices(i).x
-      arr(i*Batch.vertexSize+1) = vertices(i).y
-      arr(i*Batch.vertexSize+2) = vertices(i).z
+      arr(i*MeshUtils.vertexSize+0) = vertices(i).x
+      arr(i*MeshUtils.vertexSize+1) = vertices(i).y
+      arr(i*MeshUtils.vertexSize+2) = vertices(i).z
 
-      arr(i*Batch.vertexSize+3) = uvs(i).x
-      arr(i*Batch.vertexSize+4) = uvs(i).y
+      arr(i*MeshUtils.vertexSize+3) = uvs(i).x
+      arr(i*MeshUtils.vertexSize+4) = uvs(i).y
 
-      arr(i*Batch.vertexSize+5) = 1
-      arr(i*Batch.vertexSize+6) = 1
-      arr(i*Batch.vertexSize+7) = 1
-      arr(i*Batch.vertexSize+8) = 1
+      // normals
+      arr(i*MeshUtils.vertexSize+5) = normals(i).x
+      arr(i*MeshUtils.vertexSize+6) = normals(i).y
+      arr(i*MeshUtils.vertexSize+7) = normals(i).z
+
+      // rgba
+      arr(i*MeshUtils.vertexSize+8) = 1
+      arr(i*MeshUtils.vertexSize+9) = 1
+      arr(i*MeshUtils.vertexSize+10) = 1
+      arr(i*MeshUtils.vertexSize+11) = 1
     }
     arr
   }
@@ -95,9 +102,29 @@ object TemplateMeshes {
 
 
     val mesh: Mesh = new Mesh(8, indices.length)
-    mesh.updateVertices(toFloats(vertices, uvs), vertices.length*Batch.vertexSize)
+    mesh.updateVertices(toFloats(vertices, uvs, computeNormals(vertices, indices)), vertices.length*MeshUtils.vertexSize)
     mesh.updateIndices(indices, faceOffset)
     mesh
+  }
+
+  def computeNormals(vertices: Array[Vector3f], indices: Array[Int]): Array[Vector3f] = {
+    val normals = Array.fill(vertices.length) { new Vector3f() }
+    for(i <- indices.indices by 3) {
+      val i0 = indices(i)
+      val i1 = indices(i + 1)
+      val i2 = indices(i + 2)
+
+      val l0 = vertices(i1).copy().sub(vertices(i0))
+      val l1 = vertices(i2).copy().sub(vertices(i0))
+      val normal = l0.copy().cross(l1)
+
+      normals(i0).add(normal)
+      normals(i1).add(normal)
+      normals(i2).add(normal)
+    }
+
+    normals.foreach((v: Vector3f) => v.normalize)
+    normals
   }
 
   def buildPlane(w: Float, h: Float, d: Float): Mesh = {
@@ -107,6 +134,7 @@ object TemplateMeshes {
 
     val vertices = new Array[Vector3f](4)
     val uvs = new Array[Vector2f](4)
+    val normals = new Array[Vector3f](4)
     val indices = new Array[Int](3*2*4)
 
     vertices(0) = new Vector3f(-halfw, halfh, -halfd)
@@ -128,7 +156,7 @@ object TemplateMeshes {
     indices(5) = 0
 
     val mesh: Mesh = new Mesh(4, indices.length)
-    mesh.updateVertices(toFloats(vertices, uvs), vertices.length*Batch.vertexSize)
+    mesh.updateVertices(toFloats(vertices, uvs, computeNormals(vertices, indices)), vertices.length*MeshUtils.vertexSize)
     mesh.updateIndices(indices, indices.length)
     mesh
   }

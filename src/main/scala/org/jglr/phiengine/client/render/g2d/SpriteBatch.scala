@@ -7,7 +7,7 @@ import org.jglr.phiengine.client.render._
  * @param spriteLimit
  *                    The maximum number of sprites in one rendering
  */
-class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * Batch.vertexSize * 4, spriteLimit * 3 * 2,
+class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * MeshUtils.vertexSize * 4, spriteLimit * 3 * 2,
   defaultShader = new Shader("assets/shaders/sprites.glsl")) {
 
   private var currentText: ITexture = null

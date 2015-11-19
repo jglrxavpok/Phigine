@@ -2,16 +2,6 @@ package org.jglr.phiengine.client.render.g2d
 
 import org.jglr.phiengine.client.render.{Colors, Color, Shader, Mesh}
 
-object Batch {
-  /**
-   * The size of a single vertex:<br/>
-   * - 3 floats for position (x, y, z)<br/>
-   * - 2 floats for texture coordinates (u, v)<br/>
-   * - 4 floats for vertex color (r, g, b, a)
-   */
-  val vertexSize: Int = 3 + 2 + 4
-}
-
 /**
  * Class used for rendering inside with a mesh.<br/>
  * '''''Each creation of a Batch object allocates a mesh of ''at least'' {@code (vertexSize * verticesCount << 2)+(vertexSize * indicesCount << 2)} bytes inside the GPU memory!'''''
@@ -115,6 +105,12 @@ abstract class Batch(verticesCount: Int, indicesCount: Int, defaultShader: Shade
     addVertexData(z)
     addVertexData(u)
     addVertexData(v)
+
+    // normal
+    addVertexData(0)
+    addVertexData(0)
+    addVertexData(-1)
+
     addVertexData(color.r)
     addVertexData(color.g)
     addVertexData(color.b)

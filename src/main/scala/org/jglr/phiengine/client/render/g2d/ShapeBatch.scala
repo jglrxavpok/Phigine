@@ -1,6 +1,6 @@
 package org.jglr.phiengine.client.render.g2d
 
-import org.jglr.phiengine.client.render.{Colors, Color, Shader}
+import org.jglr.phiengine.client.render.{MeshUtils, Colors, Color, Shader}
 import org.jglr.phiengine.core.maths.Constants._
 import org.lwjgl.opengl.GL11._
 
@@ -52,7 +52,7 @@ class ShapeBatch(val mode: ShapeMode.Type = ShapeMode.FILLED, val maxVertices: I
    *               The number of vertices needed
    */
   def checkLimits(needed: Int = 0) = {
-    if(offset >= verticesData.length-needed*Batch.vertexSize)
+    if(offset >= verticesData.length-needed*MeshUtils.vertexSize)
       flush()
   }
 

@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 
 import org.jglr.phiengine.client.render.Texture
 import org.jglr.phiengine.client.ui
+import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.{FileType, FilePointer}
 import org.jglr.phiengine.core.utils.Buffers
 import org.lwjgl.BufferUtils
@@ -81,35 +82,41 @@ class Framebuffer(val w: Int, val h: Int, val attachments: FramebufferAttachment
     glDeleteFramebuffers(id)
   }
 
-  def copyFrom(other: Framebuffer): Unit = {
-    other.copyTo(id, w, h)
+  def copyFrom(other: Framebuffer, attachmentToRead: Int): Unit = {
+    other.copyTo(id, w, h, attachmentToRead)
   }
 
-  def copyFrom(otherID: Int, otherW: Int, otherH: Int): Unit = {
+  def copyFrom(otherID: Int, otherW: Int, otherH: Int, attachmentToRead: Int): Unit = {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, otherID)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id)
+    glReadBuffer(attachmentToRead)
     glBlitFramebuffer(0, 0, otherW, otherH, 0, 0, w, h, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST)
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
   }
 
-  def copyFromWindow(): Unit = {
-    copyFrom(0, ui.width, ui.height)
+  def copyFromWindow(attachmentToRead: Int): Unit = {
+    copyFrom(0, ui.width, ui.height, attachmentToRead)
   }
 
-  def copyTo(other: Framebuffer): Unit = {
-    copyTo(other.id, other.w, other.h)
+  def copyTo(other: Framebuffer, attachmentToRead: Int): Unit = {
+    copyTo(other.id, other.w, other.h, attachmentToRead)
   }
 
-  def copyTo(otherID: Int, otherW: Int, otherH: Int): Unit = {
+  def copyTo(otherID: Int, otherW: Int, otherH: Int, attachmentToRead: Int, startX: Int = 0, startY: Int = 0): Unit = {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, id)
+    glReadBuffer(attachmentToRead)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, otherID)
-    glBlitFramebuffer(0, 0, w, h, 0, 0, otherW, otherH, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST)
+    glBlitFramebuffer(0, 0, w, h, startX, startY, startX+otherW, startY+otherH, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST)
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
   }
 
-  def copyToWindow(): Unit = {
-    copyTo(0, ui.width, ui.height)
+  def copyToWindowArea(attachmentToRead: Int, startX: Int, startY: Int, w: Int, h: Int): Unit = {
+    copyTo(0, w, h, attachmentToRead, startX, startY)
+  }
+
+  def copyToWindow(attachmentToRead: Int): Unit = {
+    copyToWindowArea(attachmentToRead, 0,0,ui.width, ui.height)
   }
 }
