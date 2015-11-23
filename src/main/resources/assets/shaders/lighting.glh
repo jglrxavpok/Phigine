@@ -1,0 +1,51 @@
+struct Attenuation {
+    float exponent;
+    float linear;
+    float constant;
+};
+
+struct BaseLight {
+    Attenuation attenuation;
+    vec3 color;
+    float intensity;
+};
+
+struct PointLight {
+    BaseLight base;
+    vec3 position;
+};
+
+vec4 calcLightInternal(BaseLight light, vec3 lightDirection, vec3 normal, vec3 eyeWorldPos, float specularPower, float specularIntensity, vec3 worldPos)
+{
+    vec4 ambientColor = vec4(light.color, 1.0f) * light.intensity;
+    float diffuseFactor = dot(normal, -lightDirection);
+
+    vec4 diffuseColor = vec4(0, 0, 0, 0);
+    vec4 specularColor = vec4(0, 0, 0, 0);
+
+    if (diffuseFactor > 0) {
+        diffuseColor = vec4(light.color * light.intensity * diffuseFactor, 1.0f);
+        vec3 vertexToEye = normalize(eyeWorldPos - worldPos);
+        vec3 lightReflect = normalize(reflect(lightDirection, normal));
+        float specularFactor = dot(vertexToEye, lightReflect);
+        if (specularFactor > 0) {
+            specularFactor = pow(specularFactor, specularPower);
+            specularColor = vec4(light.color * specularIntensity * specularFactor, 1.0f);
+        }
+    }
+
+    return (ambientColor + diffuseColor + specularColor);
+}
+
+vec4 calcPointLight(vec3 worldPos, vec3 normal, vec3 eyeWorldPos, float specularPower, float specularIntensity, PointLight light)
+{
+    vec3 lightDirection = worldPos - light.position;
+    float distance = length(lightDirection);
+    lightDirection = normalize(lightDirection);
+
+    Attenuation attenuation = light.base.attenuation;
+    vec4 color = calcLightInternal(light.base, lightDirection, normal, eyeWorldPos, specularPower, specularIntensity, worldPos);
+    float attenuationVal = attenuation.constant + attenuation.linear * distance + attenuation.exponent * distance * distance;
+
+    return color / attenuationVal;
+}

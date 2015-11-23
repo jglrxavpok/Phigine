@@ -6,6 +6,13 @@ import org.jglr.phiengine.core.io.FilePointer
 import org.joml.{Vector2f, Vector4f, Vector3f}
 import java.util
 
+class Vertex {
+  var pos: Vector3f = null
+  var texCoord: Vector2f = null
+  var normal: Vector3f = null
+  var color: Vector4f = null
+}
+
 abstract class ModelLoader {
 
   def loadModel(pointer: FilePointer): Model
@@ -14,30 +21,32 @@ abstract class ModelLoader {
 
   def createModel(mesh: Mesh, pointer: FilePointer): Model
 
-  implicit def toMesh(meshData: (util.List[Vector3f] /*position*/, util.List[Vector2f]/*uv*/, util.List[Vector4f]/*color*/, util.List[Int]/*indices*/)): Mesh = {
+  implicit def toMesh(meshData: (util.List[Vertex] /*position*/, util.List[Int]/*indices*/)): Mesh = {
     // convert position vectors to floats
-    val indices = new Array[Int](meshData._4.size)
+    val indices = new Array[Int](meshData._2.size)
     val vertices = new Array[Float](meshData._1.size*MeshUtils.vertexSize)
     for(i <- indices.indices) {
-      indices(i) = meshData._4.get(i)
+      indices(i) = meshData._2.get(i)
     }
 
     // convert position vectors to floats
     for(i <- 0 until meshData._1.size) {
       val vertex = meshData._1.get(i)
-      val uv = meshData._2.get(i)
-      val color = meshData._3.get(i)
+      val pos = vertex.pos
+      val uv = vertex.texCoord
+      val normal = vertex.normal
+      val color = vertex.color
       val vsize = MeshUtils.vertexSize
-      vertices(i*vsize+0) = vertex.x
-      vertices(i*vsize+1) = vertex.y
-      vertices(i*vsize+2) = vertex.z
+      vertices(i*vsize+0) = pos.x
+      vertices(i*vsize+1) = pos.y
+      vertices(i*vsize+2) = pos.z
       vertices(i*vsize+3) = uv.x
       vertices(i*vsize+4) = uv.y
 
       // normal
-      vertices(i*vsize+5) = 1
-      vertices(i*vsize+6) = 1
-      vertices(i*vsize+7) = 1
+      vertices(i*vsize+5) = normal.x
+      vertices(i*vsize+6) = normal.y
+      vertices(i*vsize+7) = normal.z
 
       // color
       vertices(i*vsize+8) = color.x

@@ -25,14 +25,15 @@ object Framebuffer {
 
 class Framebuffer(val w: Int, val h: Int, val attachments: FramebufferAttachment*) {
 
-  private var previous: Int = 0
+  private var previousWrite: Int = 0
+  private var previousRead: Int = 0
 
   def this(w: Int, h: Int, _colorTexture: Texture = null) = {
     this(w, h, new TextureAttachment(0,_colorTexture), new DepthStencilAttachment(w, h))
   }
 
   val id = glGenFramebuffers()
-  bind()
+  bindWriting()
 
   val drawBuffers = Array.newBuilder[Int]
   var drawIndex = 0
@@ -42,7 +43,7 @@ class Framebuffer(val w: Int, val h: Int, val attachments: FramebufferAttachment
       drawBuffers += attach.getTypeID
     }
   }
-  glDrawBuffers(Buffers.wrapInt(drawBuffers.result()))
+  val drawBuffersList = Buffers.wrapInt(drawBuffers.result())
 
   val status = glCheckFramebufferStatus(GL_FRAMEBUFFER)
   if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -65,17 +66,28 @@ class Framebuffer(val w: Int, val h: Int, val attachments: FramebufferAttachment
     }
   }
 
-  unbind()
+  unbindWriting()
 
-  def bind(): Unit = {
-    previous = glGetInteger(GL_FRAMEBUFFER_BINDING)
-    glBindFramebuffer(GL_FRAMEBUFFER, id)
+  def bindWriting(): Unit = {
+    previousWrite = glGetInteger(GL_DRAW_FRAMEBUFFER_BINDING)
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id)
     glViewport(0,0,w,h)
+    if(drawBuffersList != null)
+      glDrawBuffers(drawBuffersList)
   }
 
-  def unbind(): Unit = {
-    glBindFramebuffer(GL_FRAMEBUFFER, previous)
+  def unbindWriting(): Unit = {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, previousWrite)
     glViewport(0,0,ui.width,ui.height)
+  }
+
+  def bindReading(): Unit = {
+    previousRead = glGetInteger(GL_READ_FRAMEBUFFER_BINDING)
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, id)
+  }
+
+  def unbindReading(): Unit = {
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, previousRead)
   }
 
   def dispose(): Unit = {
@@ -104,7 +116,7 @@ class Framebuffer(val w: Int, val h: Int, val attachments: FramebufferAttachment
   }
 
   def copyTo(otherID: Int, otherW: Int, otherH: Int, attachmentToRead: Int, startX: Int = 0, startY: Int = 0): Unit = {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, id)
+    bindReading()
     glReadBuffer(attachmentToRead)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, otherID)
     glBlitFramebuffer(0, 0, w, h, startX, startY, startX+otherW, startY+otherH, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST)
@@ -119,4 +131,5 @@ class Framebuffer(val w: Int, val h: Int, val attachments: FramebufferAttachment
   def copyToWindow(attachmentToRead: Int): Unit = {
     copyToWindowArea(attachmentToRead, 0,0,ui.width, ui.height)
   }
+
 }

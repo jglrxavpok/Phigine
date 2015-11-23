@@ -14,6 +14,8 @@ import org.jglr.phiengine.client.input._
 import org.jglr.phiengine.client.render.deferred.{GBufferAttachs, GBuffer}
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.render._
+import org.jglr.phiengine.client.render.g3d.{Model, DMXModelLoader}
+import org.jglr.phiengine.client.render.lighting.{AmbientLight, LightComponent, PointLight}
 import org.jglr.phiengine.client.text.{FontFormat, Font, FontRenderer}
 import org.jglr.phiengine.client.utils.{LWJGLSetup, Timer}
 import org.jglr.phiengine.core.game.Game
@@ -23,12 +25,12 @@ import org.jglr.phiengine.core.maths.YepppNativesSetup
 import org.jglr.phiengine.core.utils._
 import org.jglr.phiengine.network.channels.PhiChannel
 import org.jglr.phiengine.network.{Server, NetworkSide, NetworkHandler}
-import org.joml.Matrix4f
+import org.joml.{Vector4f, Vector3f, Matrix4f}
 import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.Callbacks
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFWvidmode
-import org.lwjgl.opengl.{GL30, GL20, GL11, GLContext}
+import org.lwjgl.opengl._
 import org.lwjgl.system.MemoryUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -159,6 +161,9 @@ class PhiEngine extends IDisposable {
   // Rendering
   private var mainFramebuffer: GBuffer = null
   private var geometryShader: Shader = null
+  private var sphere: Model = null
+  private var pointLightShader: Shader = null
+  private var defaultShader: Shader = null
 
   // Variables used to render text on loading
   private var loadingY = 0f
@@ -326,27 +331,66 @@ class PhiEngine extends IDisposable {
   }
 
   private def performGeometryPass(alpha: Float) = {
+    geometryShader.bind()
+    //mainFramebuffer.bindGeometryPass()
+    glDepthMask(true)
+    glEnable(GL_DEPTH_TEST)
+    glDepthFunc(GL_LEQUAL)
+
     glClearStencil(0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
-    mainFramebuffer.bind()
-    geometryShader.bind()
+    mainFramebuffer.bindWriting()
     glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
+
     game.render(alpha)
-    mainFramebuffer.unbind()
-    geometryShader.unbind()
+
+    glDepthMask(false)
   }
 
-  private def performLightingPass(alpha: Float): Unit = {
-    for(i <- 0 until 4) {
-      val x: Int = ((i % 2) * (displayWidth/2f)).toInt
-      val y: Int = (((4-i-1) / 2) * (displayHeight/2f)).toInt
-      mainFramebuffer.copyToWindowArea(GL_COLOR_ATTACHMENT0+i, x, y, displayWidth/2, displayHeight/2)
+  def calcPointLightBSphere(p: PointLight): Float = {
+    val maxChannel = Math.max(Math.max(p.color.x, p.color.y), p.color.z)
+    // the attenuation model is a quadratic equation, therefore in order to find then it reaches 0, we first calculate the discriminant
+    val discriminant = -p.attenuationCoefficients.y - 4*p.attenuationCoefficients.x*(p.attenuationCoefficients.z - 256 * maxChannel * p.intensity)
+    if(discriminant < 0) {
+      // no real roots, abandon ship!
+      0f
+    } else {
+      val root = (-p.attenuationCoefficients.y + Math.sqrt(discriminant)) / (2 * p.attenuationCoefficients.x)
+      root.toFloat
     }
   }
 
+  def findAllLights[T](lightClass: Class[T]): util.List[T] = {
+    val lvl = game.getLevel
+    val list = new util.ArrayList[T]
+    if(lvl != null) {
+      for(l <- lvl.components(classOf[LightComponent]).filter((p: LightComponent) => lightClass.isAssignableFrom(p.light.getClass))) {
+        list.add(l.light.asInstanceOf[T])
+      }
+    }
+    list
+  }
+
+  def findAllPointLights(): util.List[PointLight] = {
+    findAllLights(classOf[PointLight])
+  }
+
+  private def performLightingPass(alpha: Float): Unit = {
+    /*for(i <- 0 until 4) {
+      val x: Int = ((i % 2) * (displayWidth/2f)).toInt
+      val y: Int = (((4-i-1) / 2) * (displayHeight/2f)).toInt
+      mainFramebuffer.copyToWindowArea(GL_COLOR_ATTACHMENT0+i, x, y, displayWidth/2, displayHeight/2)
+    }*/
+    mainFramebuffer.copyToWindow(GL_COLOR_ATTACHMENT0)
+  }
+
   private def render(alpha: Float) {
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    //mainFramebuffer.startFrame()
     performGeometryPass(alpha)
+
+    //glEnable(GL_STENCIL_TEST)
     performLightingPass(alpha)
   }
 
@@ -389,10 +433,11 @@ class PhiEngine extends IDisposable {
       setInputProcessor(inputQueue)
       glEnable(GL_BLEND)
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-      glEnable(GL_DEPTH_TEST)
-      glDepthFunc(GL_LEQUAL)
+      sphere = DMXModelLoader.loadModel("assets/models/Sphere.dmx")
       mainFramebuffer = new GBuffer(displayWidth, displayHeight)
       geometryShader = new Shader("assets/shaders/passes/geometry.glsl")
+      pointLightShader = new Shader("assets/shaders/passes/pointLight.glsl")
+      defaultShader = new Shader("assets/shaders/passes/default.glsl")
     }
     catch {
       case e: IOException => {

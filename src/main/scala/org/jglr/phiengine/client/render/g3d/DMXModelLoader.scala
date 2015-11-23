@@ -18,8 +18,8 @@ import scala.collection.JavaConversions._
 object DMXModelLoader extends ModelLoader {
 
   private val codec = new BinaryCodec
-  private val datacache = new util.HashMap[FilePointer, Datamodel]()
-  private val meshcache = new util.HashMap[FilePointer, Mesh]()
+  private val dataCache = new util.HashMap[FilePointer, Datamodel]()
+  private val meshCache = new util.HashMap[FilePointer, Mesh]()
 
   def reconstructUVs(indexArray: Array[Int], texCoords: util.ArrayList[Vector2f], indices: Array[Int], flipV: Boolean): util.List[Vector2f] = {
     val map = new util.HashMap[Int, Vector2f]()
@@ -50,13 +50,13 @@ object DMXModelLoader extends ModelLoader {
 
   override def createModel(mesh: Mesh, pointer: FilePointer): Model = {
     val datamodel =
-      if(!datacache.containsKey(pointer)) {
+      if(!dataCache.containsKey(pointer)) {
         codec.decode(5, pointer.createInputStream)
       } else {
-        datacache.get(pointer)
+        dataCache.get(pointer)
       }
 
-    datacache.put(pointer, datamodel)
+    dataCache.put(pointer, datamodel)
 
     val materialAttr = datamodel.getElementByClass("DmeMaterial")
     checkType(materialAttr.getAttribute("mtlName"), EnumAttributeTypes.STRING)
@@ -66,17 +66,17 @@ object DMXModelLoader extends ModelLoader {
   }
 
   override def loadMesh(pointer: FilePointer): Mesh = {
-    if(!ClientEngineSettings.disallowMeshCaching && meshcache.containsKey(pointer))
-      return meshcache.get(pointer)
+    if(!ClientEngineSettings.disallowMeshCaching && meshCache.containsKey(pointer))
+      return meshCache.get(pointer)
 
     val datamodel =
-      if(!datacache.containsKey(pointer)) {
+      if(!dataCache.containsKey(pointer)) {
         codec.decode(5, pointer.createInputStream)
       } else {
-        datacache.get(pointer)
+        dataCache.get(pointer)
       }
 
-    datacache.put(pointer, datamodel)
+    dataCache.put(pointer, datamodel)
     val vertexData = datamodel.getElementByClass("DmeVertexData")
     val positionAttr = vertexData.getAttribute("positions")
     checkType(positionAttr, EnumAttributeTypes.VECTOR3_ARRAY)
@@ -90,30 +90,36 @@ object DMXModelLoader extends ModelLoader {
     val textureIndicesAttr = vertexData.getAttribute("textureCoordinatesIndices")
     checkType(textureIndicesAttr, EnumAttributeTypes.INT_ARRAY)
 
-    val colors = new util.ArrayList[Vector4f]()
-    val verticesPos = new util.ArrayList[Vector3f]()
-    val vertArray = positionAttr.getValue.getRawValue.asInstanceOf[Array[Vector3]]
-    for(i <- vertArray.indices) {
-      colors.add(new Vector4f(1,1,1,1)) // white
-    }
+    val normalsAttr = vertexData.getAttribute("normals")
+    checkType(normalsAttr, EnumAttributeTypes.VECTOR3_ARRAY)
 
-    for(vec <- vertArray) {
-      verticesPos.add(new Vector3f(vec.getX, vec.getY, vec.getZ))
-    }
+    val normalsIndicesAttr = vertexData.getAttribute("normalsIndices")
+    checkType(normalsIndicesAttr, EnumAttributeTypes.INT_ARRAY)
+
+    val normals = normalsAttr.getValue.getRawValue.asInstanceOf[Array[Vector3]]
+    val normalsIndices = normalsIndicesAttr.getValue.getRawValue.asInstanceOf[Array[Int]]
+
+    val vertArray = positionAttr.getValue.getRawValue.asInstanceOf[Array[Vector3]]
+    val texCoords = new util.ArrayList[Vector2f]()
+    val texCoordsArray = textureUVsAttr.getValue.getRawValue.asInstanceOf[Array[Vector2]]
+    val texIndices = textureIndicesAttr.getValue.getRawValue.asInstanceOf[Array[Int]]
 
     val verticesIndices = new util.ArrayList[Int]()
-    val indexArray = posIndicesAttr.getValue.getRawValue.asInstanceOf[Array[Int]]
-    /*for(i <- indexArray) {
-      verticesIndices.add(i)
-    }*/
 
+    val indexArray = posIndicesAttr.getValue.getRawValue.asInstanceOf[Array[Int]]
     // get draw indices from faces info
     val faceSet = datamodel.getElementByClass("DmeFaceSet").getAttribute("faces")
     checkType(faceSet, EnumAttributeTypes.INT_ARRAY)
     val faces = faceSet.getValue.getRawValue.asInstanceOf[Array[Int]]
     var i = 0
     var faceSize = -1
+
     var faceData: Array[Int] = null
+
+    val flipVCoords = vertexData.getAttribute("flipVCoordinates")
+    checkType(flipVCoords, EnumAttributeTypes.BOOL)
+
+    val vertices = new util.ArrayList[Vertex]
     while(i < faces.length) {
       while(faces(i) != -1) {
         if(faceData != null) {
@@ -129,34 +135,58 @@ object DMXModelLoader extends ModelLoader {
       } else {
         // triangulate the faces
         for(index <- 0 until faceData.length-3) {
-          verticesIndices.add(indexArray(faceData(0)))
+          /* verticesIndices.add(indexArray(faceData(0)))
           verticesIndices.add(indexArray(faceData(index+1)))
           verticesIndices.add(indexArray(faceData(index+2)))
+
+          texCoords.add(texCoordsArray(texIndices(faceData(0))))
+          texCoords.add(texCoordsArray(texIndices(faceData(index+1))))
+          texCoords.add(texCoordsArray(texIndices(faceData(index+2))))*/
+          def toVertex(index: Int): Vertex = {
+            val pos = vertArray(indexArray(faceData(index)))
+            val uv = texCoordsArray(texIndices(faceData(index)))
+            val normal = normals(normalsIndices(faceData(index)))
+            val vertex = new Vertex
+            vertex.pos = new Vector3f(pos.getX, pos.getY, pos.getZ)
+            vertex.texCoord = new Vector2f()
+            if(flipVCoords.getValue.getRawValue.asInstanceOf[Boolean]) {
+              vertex.texCoord.set(uv.getX, uv.getY)
+            } else {
+              vertex.texCoord.set(uv.getX, 1f-uv.getY)
+            }
+            vertex.normal = new Vector3f(normal.getX, normal.getY, normal.getZ)
+            vertex.color = new Vector4f(1,1,1,1)
+            vertex
+          }
+
+          // TODO: Try to find already existing vertices instead of reinstantiate it
+          vertices.add(toVertex(0))
+          vertices.add(toVertex(index+1))
+          vertices.add(toVertex(index+2))
+          verticesIndices.add(vertices.size()-3)
+          verticesIndices.add(vertices.size()-2)
+          verticesIndices.add(vertices.size()-1)
         }
       }
     }
 
 
-    val texCoords = new util.ArrayList[Vector2f]()
-    val texCoordsArray = textureUVsAttr.getValue.getRawValue.asInstanceOf[Array[Vector2]]
-    for(uv <- texCoordsArray) {
-      texCoords.add(new Vector2f(uv.getX, uv.getY))
-    }
-
-    val flipVCoords = vertexData.getAttribute("flipVCoordinates")
-    checkType(flipVCoords, EnumAttributeTypes.BOOL)
-
-    val mesh: Mesh = (verticesPos,
-      reconstructUVs(indexArray, texCoords, textureIndicesAttr.getValue.getRawValue.asInstanceOf[Array[Int]], flipVCoords.getValue.getRawValue.asInstanceOf[Boolean]),
-      colors,
-      verticesIndices)
+    val mesh: Mesh = (vertices, verticesIndices)
    // mesh.defaultDrawMode = GL11.GL_QUADS
     mesh
   }
 
   private def checkType(attrValue: Attribute, attrType: EnumAttributeTypes): Unit = {
+    if(attrValue == null || attrValue.getValue == null) {
+      if(attrType != EnumAttributeTypes.UNKNOWN)
+        throw new IllegalStateException("Expected attribute to be of type "+attrType.name+", but actually is "+EnumAttributeTypes.UNKNOWN)
+    }
     if(attrValue.getValue.getType != attrType) {
       throw new IllegalStateException("Expected attribute "+attrValue.getName+" to be of type "+attrType.name+", but actually is "+attrValue.getValue.getType)
     }
+  }
+
+  implicit def toVec2f(v: Vector2): Vector2f = {
+    new Vector2f(v.getX, v.getY)
   }
 }

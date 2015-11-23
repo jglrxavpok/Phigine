@@ -4,6 +4,7 @@ import org.jglr.phiengine.client.input.{InputListener, InputProcessor}
 import org.jglr.phiengine.client.render.{Texture, Color}
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.FilePointer
+import org.jglr.phiengine.core.level.Level
 import org.jglr.phiengine.core.utils.PhiConfig
 import org.joml.Matrix4f
 
@@ -101,5 +102,11 @@ abstract class Game(val engine: PhiEngine) {
   def grabMouse(): Unit = engine.grabMouse()
 
   def ungrabMouse(): Unit = engine.ungrabMouse()
+
+  /**
+    * Used by the engine in order
+    * @return
+    */
+  def getLevel: Level = null
 
 }

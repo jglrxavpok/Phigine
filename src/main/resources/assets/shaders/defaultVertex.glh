@@ -7,13 +7,15 @@ uniform mat4 u_modelview;
 out vec4 v_color;
 out vec2 v_texCoords;
 out vec4 v_pos;
-out vec3 v_normal;
+out vec4 v_normal;
 
 void main()
 {
    v_color = a_color;
    v_texCoords = a_texCoord0;
-   v_pos = u_projection * u_modelview * vec4(a_position, 1.0);
-   gl_Position = v_pos;
-   v_normal = a_normal;
+   v_pos = u_modelview * vec4(a_position, 1.0);
+   gl_Position = u_projection * v_pos;
+
+   v_pos = vec4(v_pos.xyz, 1);
+   v_normal = vec4((u_modelview * vec4(a_normal, 1.0)).xyz, 1);
 }

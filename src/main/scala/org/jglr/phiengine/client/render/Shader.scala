@@ -5,7 +5,7 @@ import java.util
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.FilePointer
 import org.jglr.phiengine.core.utils.Registry
-import org.joml.Matrix4f
+import org.joml.{Vector3f, Quaternionf, Vector4f, Matrix4f}
 import org.lwjgl.BufferUtils
 import java.io.IOException
 import java.nio.FloatBuffer
@@ -39,8 +39,10 @@ class ShaderHandle(shader: FilePointer) {
   private val path: FilePointer = shader
   private val registry: Registry[String, String] = new Registry[String, String]
 
+  preloadRegistry(registry, GL_VERTEX_SHADER)
   val vertexID: Int = compile(shader, GL_VERTEX_SHADER)
   registry.clear()
+  preloadRegistry(registry, GL_FRAGMENT_SHADER)
   val fragID: Int = compile(shader, GL_FRAGMENT_SHADER)
   registry.clear()
   glAttachShader(id, vertexID)
@@ -57,6 +59,13 @@ class ShaderHandle(shader: FilePointer) {
     PhiEngine.getInstance.getLogger.error("Failed to link shader \n" + glGetProgramInfoLog(id))
   }
 
+  /**
+    * Used when you want to define macros in the code before loading the shader
+    */
+  def preloadRegistry(registry: Registry[String, String], shaderType: Int): Unit = {
+
+  }
+
   def bind(): Unit = {
     glUseProgram(id)
     update()
@@ -70,6 +79,8 @@ class ShaderHandle(shader: FilePointer) {
         setUniformd(u.name, PhiEngine.getInstance.getTime)
       } else if (u.name.equals("u_modelview")) {
         setUniformMat4(u.name, identityMat)
+      } else if (u.name.equals("u_screenSize")) {
+        setUniform2f(u.name, PhiEngine.getInstance.getDisplayWidth, PhiEngine.getInstance.getDisplayHeight)
       }
     })
   }
@@ -88,6 +99,7 @@ class ShaderHandle(shader: FilePointer) {
         define("__GEOMETRY__", "1")
     }
     source = preprocess(source)
+   // println(source)
     val id: Int = glCreateShader(shaderType)
     glShaderSource(id, source)
     glCompileShader(id)
@@ -182,7 +194,7 @@ class ShaderHandle(shader: FilePointer) {
     }
     else {
       loc = glGetUniformLocation(id, name)
-      if (loc == -1) PhiEngine.getInstance.getLogger.error("Uniform with name '" + name + "' not found")
+      if (loc == -1) PhiEngine.getInstance.getLogger.error("Uniform with name '" + name + "' not found in shader "+shader.getName)
       locations.put(name, loc)
     }
     loc
@@ -275,6 +287,18 @@ class Shader(shader: FilePointer) {
 
   def setUniform3f(name: String, x: Float, y: Float, z: Float) {
     handle.setUniform3f(name, x, y, z)
+  }
+
+  def setUniform3f(name: String, v: Vector3f) {
+    setUniform3f(name, v.x, v.y, v.z)
+  }
+
+  def setUniform4f(name: String, v: Vector4f) {
+    setUniform4f(name, v.x, v.y, v.z, v.w)
+  }
+
+  def setUniform4f(name: String, v: Quaternionf) {
+    setUniform4f(name, v.x, v.y, v.z, v.w)
   }
 
   def setUniform4f(name: String, x: Float, y: Float, z: Float, a: Float) {
