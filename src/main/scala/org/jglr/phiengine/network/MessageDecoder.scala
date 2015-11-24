@@ -12,7 +12,7 @@ class MessageDecoder extends ByteToMessageDecoder {
   protected def decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: util.List[AnyRef]) {
     val length: Int = msg.readInt
     val id: Int = msg.readInt
-    val side: NetworkSide = NetworkSide.values(msg.readByte())
+    val side: NetworkSide = NetworkSide.get(msg.readByte())
     val message: Message = new Message(side, id)
     message.length = length
     val channelNameLength: Int = msg.readInt

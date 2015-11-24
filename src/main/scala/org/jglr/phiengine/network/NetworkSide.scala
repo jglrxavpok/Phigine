@@ -1,7 +1,8 @@
 package org.jglr.phiengine.network
 
 object NetworkSide extends Enumeration {
-  case class NetworkSideVal(id: Int, client: Boolean) extends Value {
+
+  case class NetworkSideVal(val id: Int, client: Boolean) extends Value {
     def isClient: Boolean = {
       client
     }
@@ -13,7 +14,13 @@ object NetworkSide extends Enumeration {
 
   type NetworkSide = NetworkSideVal
   val CLIENT = NetworkSideVal(0, true)
-  val SERVER = NetworkSideVal(0, false)
+  val SERVER = NetworkSideVal(1, false)
 
-  override val values = Array(CLIENT, SERVER)
+  def get(byte: Byte): NetworkSide = {
+    if(byte == 0)
+      CLIENT
+    else
+      SERVER
+  }
+
 }

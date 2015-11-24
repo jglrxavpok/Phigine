@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandler
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.network.NetworkSide.NetworkSide
-import org.jglr.phiengine.network.{Message, Packet}
+import org.jglr.phiengine.network.{PacketHandler, Message, Packet}
 
 class NetworkChannel(private val name: String, private val side: NetworkSide) extends ChannelInboundHandler {
   private var context: ChannelHandlerContext = null
@@ -53,11 +53,10 @@ class NetworkChannel(private val name: String, private val side: NetworkSide) ex
     val packet: Packet = message.createPacket
     packet.read(message.payload)
     if (message.getSide == side) {
-      val handler = PhiEngine.getInstance.getNetworkHandler.getHandler(packet.getClass)
+      val handler: PacketHandler[Packet] = PhiEngine.getInstance.getNetworkHandler.getHandler(packet.getClass).asInstanceOf[PacketHandler[Packet]]
       if (side.isClient) {
         handler.handleClient(packet)
-      }
-      else {
+      } else {
         handler.handleServer(packet)
       }
     }

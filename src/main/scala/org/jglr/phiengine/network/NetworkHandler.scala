@@ -38,7 +38,7 @@ class NetworkHandler {
   def newPacket(side: NetworkSide, id: Int): Packet = {
     val packetClass: Class[_ <: Packet] = sidePackets.get(side).get(id)
     if (packetClass != null) {
-      val p: Packet = packetClass.getConstructor(classOf[Int]).newInstance(id)
+      val p: Packet = packetClass.getConstructor(classOf[Int]).newInstance(id.asInstanceOf[Object])
       return p
     }
     null

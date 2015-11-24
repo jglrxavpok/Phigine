@@ -33,7 +33,8 @@ class Server(val netHandler: NetworkHandler) extends Runnable {
           ch.pipeline.addFirst(new LengthFieldBasedFrameDecoder(2 * 1024 * 1024, 0, 4)).addLast(new MessageDecoder).addLast(new MessageEncoder(NetworkSide.SERVER))
           netHandler.getChannelRegistry.foreachValue((v: NetworkChannel) => ch.pipeline.addLast(v))
         }
-      }).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true)
+      }).option[Integer](ChannelOption.SO_BACKLOG, 128)
+        .childOption(ChannelOption.SO_KEEPALIVE, Boolean.box(true))
       val f: ChannelFuture = b.bind(port).addListener(new GenericFutureListener[ChannelFuture] {
         override def operationComplete(future: ChannelFuture): Unit = {
 

@@ -20,5 +20,11 @@ class MessageEncoder(val side: NetworkSide) extends MessageToByteEncoder[Packet]
     buffer.writerIndex(0)
     out.writeInt(l)
     out.writeInt(PhiEngine.getInstance.getNetworkHandler.getPacketID(side, msg))
+    out.writeByte(side.id)
+
+    val channel = msg.getChannel
+    out.writeInt(channel.length)
+    out.writeBytes(channel.getBytes("UTF-8"))
+    out.writeBytes(buffer)
   }
 }

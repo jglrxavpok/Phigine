@@ -135,21 +135,17 @@ object PhiEngine {
   }
 }
 
-class PhiEngine extends IDisposable {
+class PhiEngine extends PhigineBase {
 
-  private var logger: Logger = null
   var timer: Timer = null
-  private var tickableRegistry: Registry[String, ITickable] = null
   private var game: Game = null
   var displayWidth: Int = 0
   var displayHeight: Int = 0
   private var window: WindowPointer = null
-  private var running: Boolean = false
   private var inputHandler: InputHandler = null
   private var inputQueue: InputProcessorQueue = null
   private var stopKey: Input = null
   private var projectionMatrix: Matrix4f = null
-  private var networkHandler: NetworkHandler = null
   private var backgroundColor = Colors.black
   var autoUpdates: Boolean = false
   private val tickableQueue = new util.LinkedList[ITickable]
@@ -194,13 +190,11 @@ class PhiEngine extends IDisposable {
     running = false
   }
 
-  def init(game: Game, config: PhiConfig) {
-    logger = LoggerFactory.getLogger(game.getName)
-    logger.info("Loading Phigine "+PhiEngine.getVersion)
+  override def init(game: Game, config: PhiConfig) {
+    super.init(game, config)
     EngineStart.handle(this, config)
     assets = new Assets(this, game)
     setProjectionMatrix(new Matrix4f().setOrtho(0, getDisplayWidth, getDisplayHeight, 0, -100, 100))
-    tickableRegistry = new Registry[String, ITickable]
     this.game = game
     initLJWGL(config)
     YepppNativesSetup.load(nativesFolder, logger)
@@ -235,8 +229,6 @@ class PhiEngine extends IDisposable {
     timer = new Timer
     timer.init
     displayLoadingStep("Now loading network code")
-    networkHandler = new NetworkHandler(this)
-    networkHandler.registerChannel("Phigine", new PhiChannel(NetworkSide.CLIENT))
     val server: Server = networkHandler.newServer
     displayLoadingStep("Now loading "+game.getName)
     game.init(config)
@@ -271,36 +263,7 @@ class PhiEngine extends IDisposable {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   }
 
-  def loop() {
-    var delta: Float = 0
-    var accumulator: Float = 0f
-    val interval: Float = 1f / 60L
-    var alpha: Float = 0
-    while (running) {
-      delta = timer.getDelta
-      accumulator += delta
-      pollEvents()
-      while (accumulator >= interval) {
-        update(interval)
-        accumulator -= interval
-      }
-      alpha = accumulator / interval
-      render(alpha)
-      if (usesSteamworks && SteamAPI.isSteamRunning) {
-        SteamAPI.runCallbacks()
-      }
-      checkGLError("post rendering")
-      window.swapBuffers
-      window.pollEvents
-      timer.updateFPS
-      timer.updateUPS
-      timer.update
-      if (window.shouldClose) running = false
-    }
-    dispose()
-  }
-
-  private def update(delta: Float) {
+  override def update(delta: Float) {
     game.update(delta)
     while(!tickableQueue.isEmpty) {
       val tickable = tickableQueue.remove(0)
@@ -311,9 +274,13 @@ class PhiEngine extends IDisposable {
       tickableRegistry.delete(tickable.toString)
     }
     tickableRegistry.foreachValue((t: ITickable) => if(t.shouldAutoUpdate) t.tick(delta))
+
+    if (usesSteamworks && SteamAPI.isSteamRunning) {
+      SteamAPI.runCallbacks()
+    }
   }
 
-  private def pollEvents() {
+  override def pollEvents() {
     inputQueue.drain()
     if (stopKey.isPressed) {
       running = false
@@ -385,13 +352,24 @@ class PhiEngine extends IDisposable {
     mainFramebuffer.copyToWindow(GL_COLOR_ATTACHMENT0)
   }
 
-  private def render(alpha: Float) {
+  override def render(alpha: Float) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     //mainFramebuffer.startFrame()
     performGeometryPass(alpha)
 
     //glEnable(GL_STENCIL_TEST)
     performLightingPass(alpha)
+
+    checkGLError("post rendering")
+  }
+
+  override def postLoop(): Unit = {
+    window.swapBuffers
+    window.pollEvents
+    timer.updateFPS
+    timer.updateUPS
+    timer.update
+    if (window.shouldClose) running = false
   }
 
   private def initLJWGL(config: PhiConfig) {
@@ -455,7 +433,7 @@ class PhiEngine extends IDisposable {
     glfwSetScrollCallback(window.getPointer, processor.scrollCallback)
   }
 
-  def dispose() {
+  override def dispose(): Unit = {
     window.destroy
     glfwTerminate()
     val outputs = Shaders.outputList || Textures.outputList
@@ -486,19 +464,11 @@ class PhiEngine extends IDisposable {
     obj.add(assetType, assetList)
   }
 
-  def getLogger: Logger = {
-    logger
-  }
-
   def checkGLError(location: String) {
     val glError: Int = glGetError
     if (glError != GL_NO_ERROR) {
       logger.error("OpenGL Error: " + GLContext.translateGLErrorString(glError) + " at " + location)
     }
-  }
-
-  def getTickableRegistry: Registry[String, ITickable] = {
-    tickableRegistry
   }
 
   def getDisplayHeight: Int = {
@@ -543,12 +513,10 @@ class PhiEngine extends IDisposable {
     glfwGetTime
   }
 
+  def getDelta(): Float = timer.getDelta
+
   def setIcon(icon: FilePointer) {
     getLogger.error("Icons are not yet supported.")
-  }
-
-  def getNetworkHandler: NetworkHandler = {
-    networkHandler
   }
 
   def setBackgroundColor(color: Color) = {
