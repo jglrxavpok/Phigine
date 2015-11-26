@@ -1,13 +1,9 @@
 package org.jglr.phiengine.network
 
-import io.netty.buffer.ByteBuf
+import org.jglr.phiengine.network.utils.NetworkSerializable
 
-abstract class Packet(val id: Int) {
+abstract class Packet(val id: Int) extends NetworkSerializable {
   private var channel: String = null
-
-  def write(buffer: ByteBuf)
-
-  def read(buffer: ByteBuf)
 
   def getChannel: String = {
     channel

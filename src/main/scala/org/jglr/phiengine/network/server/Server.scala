@@ -1,17 +1,19 @@
-package org.jglr.phiengine.network
+package org.jglr.phiengine.network.server
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder
 import io.netty.util.concurrent.GenericFutureListener
-import org.jglr.phiengine.network.channels.NetworkChannel
 import org.jglr.phiengine.core.utils.JavaConversions._
-import org.jglr.phiengine.network.utils.PhigineNetSettings
+import org.jglr.phiengine.network.channels.NetworkChannel
+import org.jglr.phiengine.network.client.ClientNetHandler
+import org.jglr.phiengine.network.utils.PhiFrameDecoder
+import org.jglr.phiengine.network.{MessageDecoder, MessageEncoder, NetworkHandler, NetworkSide}
+import org.jglr.phiengine.server.GameServer
 
-class Server(val netHandler: NetworkHandler) extends Runnable {
+class Server(val backing: GameServer, val netHandler: ServerNetHandler) extends Runnable {
   private var channel: Channel = null
   private var port: Int = 0
   private var thread: Thread = null
@@ -31,7 +33,10 @@ class Server(val netHandler: NetworkHandler) extends Runnable {
       b.group(bossGroup, workerGroup).channel(classOf[NioServerSocketChannel]).childHandler(new ChannelInitializer[SocketChannel]() {
         @throws(classOf[Exception])
         def initChannel(ch: SocketChannel) {
-          ch.pipeline.addLast(new LengthFieldBasedFrameDecoder(PhigineNetSettings.maxPacketSize, 0, 4)).addLast(new MessageDecoder).addLast(new MessageEncoder(netHandler, NetworkSide.SERVER))
+          val decoder = new MessageDecoder(netHandler)
+          val encoder = new MessageEncoder(netHandler, NetworkSide.SERVER)
+          val framer = new PhiFrameDecoder()
+          ch.pipeline.addLast(framer).addLast(decoder).addLast(encoder)
           netHandler.getChannelRegistry.foreachValue((v: NetworkChannel) => ch.pipeline.addLast(v))
         }
       }).option[Integer](ChannelOption.SO_BACKLOG, 128)

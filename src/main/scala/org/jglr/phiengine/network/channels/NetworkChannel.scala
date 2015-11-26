@@ -4,7 +4,9 @@ import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerCon
 import io.netty.util.concurrent.GenericFutureListener
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.network.NetworkSide.NetworkSide
-import org.jglr.phiengine.network.{PacketHandler, Message, Packet}
+import org.jglr.phiengine.network.client.ClientNetHandler
+import org.jglr.phiengine.network.server.ServerNetHandler
+import org.jglr.phiengine.network._
 
 class NetworkChannel(private val name: String, private val side: NetworkSide) extends ChannelInboundHandler {
   private var context: ChannelHandlerContext = null
@@ -65,16 +67,17 @@ class NetworkChannel(private val name: String, private val side: NetworkSide) ex
 
   @throws(classOf[Exception])
   def channelRead(ctx: ChannelHandlerContext, msg: AnyRef) {
-    println("channelRead!! :DDD")
     val message: Message = msg.asInstanceOf[Message]
-    val packet: Packet = message.createPacket
-    packet.read(message.payload)
-    if (message.getSide == side) {
-      val handler: PacketHandler[Packet] = PhiEngine.getInstance.getNetworkHandler.getHandler(packet.getClass).asInstanceOf[PacketHandler[Packet]]
-      if (side.isClient) {
-        handler.handleClient(packet)
-      } else {
-        handler.handleServer(packet)
+    if(message.channel.equals(this)) {
+      val packet: Packet = message.createPacket
+      packet.read(message.payload)
+      if (message.getSide.id != side.id) { // check if packet was not sent from a client to a client or from a server to a server
+        val handler: PacketHandler[Packet] = message.networkHandler.getHandler(packet.getClass).asInstanceOf[PacketHandler[Packet]]
+        if (side == NetworkSide.CLIENT) {
+          handler.handleClient(packet, this, message.networkHandler.asInstanceOf[ClientNetHandler])
+        } else {
+          handler.handleServer(packet, this, message.networkHandler.asInstanceOf[ServerNetHandler])
+        }
       }
     }
   }
@@ -102,5 +105,18 @@ class NetworkChannel(private val name: String, private val side: NetworkSide) ex
   @throws(classOf[Exception])
   def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
     PhiEngine.crash("Error while reading network", cause)
+  }
+
+  override def equals(obj: scala.Any): Boolean = {
+    obj match {
+      case null =>
+        false
+
+      case channel: NetworkChannel =>
+        channel.side.id == side.id && channel.name.equals(name)
+
+      case _ =>
+        false
+    }
   }
 }

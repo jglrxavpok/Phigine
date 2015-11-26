@@ -1,17 +1,17 @@
-package org.jglr.phiengine.network
+package org.jglr.phiengine.network.client
 
-import io.netty.bootstrap.{Bootstrap, ServerBootstrap}
+import io.netty.bootstrap.Bootstrap
+import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.{NioSocketChannel, NioServerSocketChannel}
-import io.netty.channel._
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder
+import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.GenericFutureListener
-import org.jglr.phiengine.network.channels.NetworkChannel
 import org.jglr.phiengine.core.utils.JavaConversions._
-import org.jglr.phiengine.network.utils.PhigineNetSettings
+import org.jglr.phiengine.network.channels.NetworkChannel
+import org.jglr.phiengine.network.utils.PhiFrameDecoder
+import org.jglr.phiengine.network.{MessageDecoder, MessageEncoder, NetworkHandler, NetworkSide}
 
-class Client(val netHandler: NetworkHandler) extends Runnable {
+class Client(val netHandler: ClientNetHandler) extends Runnable {
   private var channel: Channel = null
   private var host: String = null
   private var port: Int = 0
@@ -29,7 +29,10 @@ class Client(val netHandler: NetworkHandler) extends Runnable {
       b.group(workerGroup).channel(classOf[NioSocketChannel]).handler(new ChannelInitializer[SocketChannel]() {
         @throws(classOf[Exception])
         def initChannel(ch: SocketChannel) {
-          ch.pipeline.addLast(new LengthFieldBasedFrameDecoder(PhigineNetSettings.maxPacketSize, 0, 4)).addLast(new MessageDecoder).addLast(new MessageEncoder(netHandler, NetworkSide.CLIENT))
+          val decoder = new MessageDecoder(netHandler)
+          val encoder = new MessageEncoder(netHandler, NetworkSide.CLIENT)
+          val framer = new PhiFrameDecoder()
+          ch.pipeline.addLast(framer).addLast(decoder).addLast(encoder)
           netHandler.getChannelRegistry.foreachValue((v: NetworkChannel) => ch.pipeline.addLast(v))
         }
       }).option(ChannelOption.SO_KEEPALIVE, Boolean.box(true))

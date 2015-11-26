@@ -7,7 +7,7 @@ import org.jglr.phiengine.core.utils.Registry
 import java.lang.reflect.InvocationTargetException
 import java.util
 
-class NetworkHandler {
+abstract class NetworkHandler {
   private final val channels: Registry[String, NetworkChannel] = new Registry[String, NetworkChannel]
   private final val handlers: Registry[Class[_ <: Packet], PacketHandler[_ <: Packet]] = new Registry[Class[_ <: Packet], PacketHandler[_ <: Packet]]
   private final val sidePackets: util.HashMap[NetworkSide, Registry[Integer, Class[_ <: Packet]]] = new util.HashMap()
@@ -15,12 +15,15 @@ class NetworkHandler {
   sidePackets.put(NetworkSide.CLIENT, new Registry[Integer, Class[_ <: Packet]])
   sidePackets.put(NetworkSide.SERVER, new Registry[Integer, Class[_ <: Packet]])
 
-  def registerPacket(side: NetworkSide, id: Int, packet: Class[_ <: Packet]) {
+  def registerPacket[T <: Packet](side: NetworkSide, id: Int, packet: Class[T], handler: PacketHandler[T] = null): Unit = {
     sidePackets.get(side).register(id, packet)
+    if(handler != null) {
+      registerHandler(packet, handler)
+    }
   }
 
-  def registerChannel(name: String, channel: NetworkChannel) {
-    channels.register(name, channel)
+  def registerChannel(channel: NetworkChannel) {
+    channels.register(channel.getName, channel)
   }
 
   def getHandler[T <: Packet](packetClass: Class[T]): PacketHandler[T] = {
@@ -42,10 +45,6 @@ class NetworkHandler {
       return p
     }
     null
-  }
-
-  def newServer: Server = {
-    new Server(this)
   }
 
   def getChannelRegistry: Registry[String, NetworkChannel] = {

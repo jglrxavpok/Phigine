@@ -7,10 +7,10 @@ import java.util
 
 import org.jglr.phiengine.network.NetworkSide.NetworkSide
 
-class MessageDecoder extends ByteToMessageDecoder {
+class MessageDecoder(val networkHandler: NetworkHandler) extends ByteToMessageDecoder {
   @throws(classOf[Exception])
   protected def decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: util.List[AnyRef]) {
-    if(msg.readableBytes() < 4)
+    if(msg.readableBytes() == 0)
       return
     val length: Int = msg.readInt
     val id: Int = msg.readInt
@@ -20,7 +20,10 @@ class MessageDecoder extends ByteToMessageDecoder {
     val channelNameLength: Int = msg.readInt
     val chars: Array[Byte] = new Array[Byte](channelNameLength)
     msg.readBytes(chars)
-    message.channel = new String(chars, "UTF-8")
+    message.networkHandler = networkHandler
+    val channelName = new String(chars, "UTF-8")
+    message.channel = networkHandler.getChannelRegistry.get(channelName)
+    println(s"found name: $channelName")
     message.payload = msg.readBytes(length)
     out.add(message)
   }

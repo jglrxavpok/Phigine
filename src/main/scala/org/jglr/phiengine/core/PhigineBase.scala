@@ -9,7 +9,7 @@ import org.jglr.phiengine.core.game.Game
 import org.jglr.phiengine.core.io.Assets
 import org.jglr.phiengine.core.maths.YepppNativesSetup
 import org.jglr.phiengine.core.utils._
-import org.jglr.phiengine.network.{Server, NetworkSide, NetworkHandler}
+import org.jglr.phiengine.network.{NetworkSide, NetworkHandler}
 import org.jglr.phiengine.network.channels.PhiChannel
 import org.joml.Matrix4f
 import org.lwjgl.glfw.GLFW._
@@ -26,8 +26,6 @@ abstract class PhigineBase extends IDisposable {
     logger = LoggerFactory.getLogger(game.getName)
     logger.info("Loading Phigine "+PhiEngine.getVersion)
     tickableRegistry = new Registry[String, ITickable]
-    networkHandler = new NetworkHandler
-    networkHandler.registerChannel("Phigine", new PhiChannel(NetworkSide.CLIENT))
   }
 
   /**

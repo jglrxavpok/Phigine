@@ -1,6 +1,8 @@
 package org.jglr.phiengine.core.utils
 
+import io.netty.buffer.ByteBuf
 import org.jglr.phiengine.core.utils.ArrayUtils._
+import org.jglr.phiengine.network.utils.NetworkSerializable
 
 object Version {
   def create(version: String): Version = {
@@ -17,7 +19,22 @@ object Version {
   }
 }
 
-class Version(val major: Int, val minor: Int, val patch: Int, val build: Int, val indev: Boolean = false) {
+class Version(private var major: Int, private var minor: Int, private var patch: Int, private var build: Int, private var indev: Boolean = false) extends NetworkSerializable {
+
+  def this() {
+    this(0,0,0,0,false)
+  }
+
+  def getMajor: Int = this.major
+
+  def getMinor: Int = minor
+
+  def getPatch: Int = patch
+
+  def getBuild: Int = build
+
+  def isIndev: Boolean = indev
+
   def isSuperiorTo(version: Version): Boolean = {
     if(major > version.major) {
       true
@@ -47,7 +64,20 @@ class Version(val major: Int, val minor: Int, val patch: Int, val build: Int, va
   }
 
   def isInferiorTo(version: Version): Boolean = {
-    !isSuperiorTo(version)
+    !isSuperiorTo(version) && !equals(version)
+  }
+
+  override def equals(obj: scala.Any): Boolean = {
+    obj match {
+      case null =>
+        false
+
+      case v: Version =>
+        v.build == build && v.major == major && v.minor == minor && v.patch == patch && v.indev == indev
+
+      case _ =>
+        false
+    }
   }
 
   override def toString: String = {
@@ -56,5 +86,21 @@ class Version(val major: Int, val minor: Int, val patch: Int, val build: Int, va
       result+="-INDEV"
     }
     result
+  }
+
+  override def read(buf: ByteBuf): Unit = {
+    major = buf.readInt()
+    minor = buf.readInt()
+    patch = buf.readInt()
+    build = buf.readInt()
+    indev = buf.readBoolean()
+  }
+
+  override def write(buf: ByteBuf): Unit = {
+    buf.writeInt(major)
+    buf.writeInt(minor)
+    buf.writeInt(patch)
+    buf.writeInt(build)
+    buf.writeBoolean(indev)
   }
 }

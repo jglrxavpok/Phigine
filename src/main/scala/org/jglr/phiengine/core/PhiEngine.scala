@@ -24,7 +24,8 @@ import org.jglr.phiengine.core.level.Level
 import org.jglr.phiengine.core.maths.YepppNativesSetup
 import org.jglr.phiengine.core.utils._
 import org.jglr.phiengine.network.channels.PhiChannel
-import org.jglr.phiengine.network.{Server, NetworkSide, NetworkHandler}
+import org.jglr.phiengine.network.server.Server
+import org.jglr.phiengine.network.{NetworkSide, NetworkHandler}
 import org.joml.{Vector4f, Vector3f, Matrix4f}
 import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.Callbacks
@@ -229,7 +230,6 @@ class PhiEngine extends PhigineBase {
     timer = new Timer
     timer.init
     displayLoadingStep("Now loading network code")
-    val server: Server = networkHandler.newServer
     displayLoadingStep("Now loading "+game.getName)
     game.init(config)
     running = true

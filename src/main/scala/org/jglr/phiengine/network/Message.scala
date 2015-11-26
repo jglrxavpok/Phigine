@@ -5,11 +5,13 @@ import org.jglr.phiengine.core.PhiEngine
 import java.lang.reflect.InvocationTargetException
 
 import org.jglr.phiengine.network.NetworkSide.NetworkSide
+import org.jglr.phiengine.network.channels.NetworkChannel
 
 class Message(val side: NetworkSide, val id: Int) {
   var payload: ByteBuf = null
   var length: Int = 0
-  var channel: String = null
+  var channel: NetworkChannel = null
+  var networkHandler: NetworkHandler = null
 
   def getID: Int = {
     id
@@ -24,7 +26,6 @@ class Message(val side: NetworkSide, val id: Int) {
   @throws(classOf[InstantiationException])
   @throws(classOf[IllegalAccessException])
   def createPacket: Packet = {
-    val net: NetworkHandler = PhiEngine.getInstance.getNetworkHandler
-    net.newPacket(side, id)
+    networkHandler.newPacket(side, id)
   }
 }

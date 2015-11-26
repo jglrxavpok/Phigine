@@ -31,7 +31,12 @@ class MessageEncoder(val netHandler: NetworkHandler, val side: NetworkSide) exte
     frame.writeBytes(buffer)
 
     val frameLength = frame.writerIndex()
+    // header
     out.writeInt(frameLength)
+
+    // body
     out.writeBytes(frame)
+
+    println("send packet: "+msg.getClass)
   }
 }
