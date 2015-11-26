@@ -9,6 +9,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder
 import io.netty.util.concurrent.GenericFutureListener
 import org.jglr.phiengine.network.channels.NetworkChannel
 import org.jglr.phiengine.core.utils.JavaConversions._
+import org.jglr.phiengine.network.utils.PhigineNetSettings
 
 class Server(val netHandler: NetworkHandler) extends Runnable {
   private var channel: Channel = null
@@ -30,18 +31,33 @@ class Server(val netHandler: NetworkHandler) extends Runnable {
       b.group(bossGroup, workerGroup).channel(classOf[NioServerSocketChannel]).childHandler(new ChannelInitializer[SocketChannel]() {
         @throws(classOf[Exception])
         def initChannel(ch: SocketChannel) {
-          ch.pipeline.addFirst(new LengthFieldBasedFrameDecoder(2 * 1024 * 1024, 0, 4)).addLast(new MessageDecoder).addLast(new MessageEncoder(NetworkSide.SERVER))
+          ch.pipeline.addLast(new LengthFieldBasedFrameDecoder(PhigineNetSettings.maxPacketSize, 0, 4)).addLast(new MessageDecoder).addLast(new MessageEncoder(netHandler, NetworkSide.SERVER))
           netHandler.getChannelRegistry.foreachValue((v: NetworkChannel) => ch.pipeline.addLast(v))
         }
       }).option[Integer](ChannelOption.SO_BACKLOG, 128)
         .childOption(ChannelOption.SO_KEEPALIVE, Boolean.box(true))
       val f: ChannelFuture = b.bind(port).addListener(new GenericFutureListener[ChannelFuture] {
         override def operationComplete(future: ChannelFuture): Unit = {
-
+          if(future.isDone) {
+            println(": "+future.isSuccess)
+            if(future.cause() != null) {
+              future.cause().printStackTrace()
+            }
+          }
         }
       }).sync
+      println("START OF SERV")
       channel = f.channel
-      channel.closeFuture.sync
+      channel.closeFuture.sync.addListener(new GenericFutureListener[ChannelFuture] {
+        override def operationComplete(future: ChannelFuture): Unit = {
+          if(future.isDone) {
+            println(": "+future.isSuccess)
+            if(future.cause() != null) {
+              future.cause().printStackTrace()
+            }
+          }
+        }
+      })
     }
     catch {
       case e: Exception =>

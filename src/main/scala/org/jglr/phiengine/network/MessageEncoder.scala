@@ -5,26 +5,33 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToByteEncoder
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.network.NetworkSide.NetworkSide
+import org.jglr.phiengine.network.utils.PhigineNetSettings
 
-class MessageEncoder(val side: NetworkSide) extends MessageToByteEncoder[Packet] {
+class MessageEncoder(val netHandler: NetworkHandler, val side: NetworkSide) extends MessageToByteEncoder[Packet] {
   private var buffer: ByteBuf = null
+  private var frame: ByteBuf = null
 
   @throws(classOf[Exception])
   protected def encode(ctx: ChannelHandlerContext, msg: Packet, out: ByteBuf) {
     if (buffer == null) {
-      buffer = ctx.alloc.buffer(2 * 1024 * 1024)
+      buffer = ctx.alloc.buffer(PhigineNetSettings.maxPacketSize)
+      frame = ctx.alloc.buffer(PhigineNetSettings.maxPacketSize)
     }
+    buffer.writerIndex(0)
+    frame.writerIndex(0)
     msg.write(buffer)
     val l: Int = buffer.writerIndex
-    out.writeBytes(buffer, l)
-    buffer.writerIndex(0)
-    out.writeInt(l)
-    out.writeInt(PhiEngine.getInstance.getNetworkHandler.getPacketID(side, msg))
-    out.writeByte(side.id)
+    frame.writeInt(l)
+    frame.writeInt(netHandler.getPacketID(side, msg))
+    frame.writeByte(side.id)
 
     val channel = msg.getChannel
-    out.writeInt(channel.length)
-    out.writeBytes(channel.getBytes("UTF-8"))
-    out.writeBytes(buffer)
+    frame.writeInt(channel.length)
+    frame.writeBytes(channel.getBytes("UTF-8"))
+    frame.writeBytes(buffer)
+
+    val frameLength = frame.writerIndex()
+    out.writeInt(frameLength)
+    out.writeBytes(frame)
   }
 }

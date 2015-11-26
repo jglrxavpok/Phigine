@@ -10,6 +10,8 @@ import org.jglr.phiengine.network.NetworkSide.NetworkSide
 class MessageDecoder extends ByteToMessageDecoder {
   @throws(classOf[Exception])
   protected def decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: util.List[AnyRef]) {
+    if(msg.readableBytes() < 4)
+      return
     val length: Int = msg.readInt
     val id: Int = msg.readInt
     val side: NetworkSide = NetworkSide.get(msg.readByte())

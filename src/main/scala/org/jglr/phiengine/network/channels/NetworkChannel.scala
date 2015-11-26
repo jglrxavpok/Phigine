@@ -1,7 +1,7 @@
 package org.jglr.phiengine.network.channels
 
-import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelInboundHandler
+import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, ChannelInboundHandler}
+import io.netty.util.concurrent.GenericFutureListener
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.network.NetworkSide.NetworkSide
 import org.jglr.phiengine.network.{PacketHandler, Message, Packet}
@@ -17,9 +17,25 @@ class NetworkChannel(private val name: String, private val side: NetworkSide) ex
     context
   }
 
-  def write(packet: Packet) {
+  def writeFlush(packet: Packet): Unit = {
+    write(packet)
+    flush()
+  }
+
+  def write(packet: Packet): Unit = {
     packet.setChannel(name)
-    context.write(packet)
+    //.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+    context.write(packet).addListener(new GenericFutureListener[ChannelFuture] {
+      override def operationComplete(future: ChannelFuture): Unit = {
+        if(future.isDone) {
+          println(": "+future.isSuccess)
+          if(future.cause() != null) {
+            future.cause().printStackTrace()
+          }
+        }
+      }
+    })
+    println("write")
   }
 
   def flush(): Unit = {
@@ -31,24 +47,25 @@ class NetworkChannel(private val name: String, private val side: NetworkSide) ex
 
   @throws(classOf[Exception])
   def channelRegistered(ctx: ChannelHandlerContext) {
-    this.context = ctx
   }
 
   @throws(classOf[Exception])
-  def channelUnregistered(ctx: ChannelHandlerContext) {
+  def channelUnregistered(ctx: ChannelHandlerContext): Unit = {
   }
 
   @throws(classOf[Exception])
   def channelActive(ctx: ChannelHandlerContext) {
+    this.context = ctx
     onConnection()
   }
 
   @throws(classOf[Exception])
-  def channelInactive(ctx: ChannelHandlerContext) {
+  def channelInactive(ctx: ChannelHandlerContext): Unit = {
   }
 
   @throws(classOf[Exception])
   def channelRead(ctx: ChannelHandlerContext, msg: AnyRef) {
+    println("channelRead!! :DDD")
     val message: Message = msg.asInstanceOf[Message]
     val packet: Packet = message.createPacket
     packet.read(message.payload)

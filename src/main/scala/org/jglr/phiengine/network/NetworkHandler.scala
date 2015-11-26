@@ -2,7 +2,7 @@ package org.jglr.phiengine.network
 
 import com.google.common.collect.Maps
 import org.jglr.phiengine.network.NetworkSide.NetworkSide
-import org.jglr.phiengine.network.channels.NetworkChannel
+import org.jglr.phiengine.network.channels.{PhiChannel, NetworkChannel}
 import org.jglr.phiengine.core.utils.Registry
 import java.lang.reflect.InvocationTargetException
 import java.util
@@ -15,7 +15,7 @@ class NetworkHandler {
   sidePackets.put(NetworkSide.CLIENT, new Registry[Integer, Class[_ <: Packet]])
   sidePackets.put(NetworkSide.SERVER, new Registry[Integer, Class[_ <: Packet]])
 
-  def registerPacket(side: NetworkSide.type, id: Int, packet: Class[_ <: Packet]) {
+  def registerPacket(side: NetworkSide, id: Int, packet: Class[_ <: Packet]) {
     sidePackets.get(side).register(id, packet)
   }
 
@@ -53,6 +53,12 @@ class NetworkHandler {
   }
 
   def getPacketID(side: NetworkSide, packet: Packet): Int = {
-    sidePackets.get(side).findKey(packet.getClass)
+    val value = sidePackets.get(side).findKey(packet.getClass)
+    if(value != null) {
+      value
+    } else {
+      println("nothing found on side "+side+" for "+packet.getClass)
+      -1
+    }
   }
 }
