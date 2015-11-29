@@ -12,10 +12,14 @@ class MessageDecoder(val networkHandler: NetworkHandler) extends ByteToMessageDe
   protected def decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: util.List[AnyRef]) {
     if(msg.readableBytes() == 0)
       return
+    val packetIndex: Long = msg.readLong()
+    val answerIndex: Long = msg.readLong()
     val length: Int = msg.readInt
     val id: Int = msg.readInt
     val side: NetworkSide = NetworkSide.get(msg.readByte())
     val message: Message = new Message(side, id)
+    message.answerIndex = answerIndex
+    message.packetIndex = packetIndex
     message.length = length
     val channelNameLength: Int = msg.readInt
     val chars: Array[Byte] = new Array[Byte](channelNameLength)

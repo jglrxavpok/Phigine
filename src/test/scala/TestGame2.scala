@@ -9,8 +9,8 @@ import org.jglr.phiengine.core.entity.Entity
 import org.jglr.phiengine.core.game.Game
 import org.jglr.phiengine.core.io.FilePointer
 import org.jglr.phiengine.core.level.{Level, PhysicsLevel}
-import org.jglr.phiengine.core.maths.Vec2
 import org.jglr.phiengine.core.utils.PhiConfig
+import org.joml.Vector2f
 import org.lwjgl.glfw.GLFW
 
 class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
@@ -47,7 +47,7 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
     setIcon(new FilePointer("icon64.png"))
     sprite = new Sprite(logo)
 
-    level = new PhysicsLevel(new Vec2())
+    level = new PhysicsLevel(new Vector2f())
     lvlRenderer = new LevelRenderer(level)
     val ent = new Entity(level)
     ent.addComponent(classOf[TestComponent])
@@ -85,7 +85,7 @@ class TestGame2(engine: PhiEngine) extends Game(engine: PhiEngine) {
   //  batch.draw(logo, x - logo.getWidth / 2, y - logo.getHeight / 2)
     batch.draw(logo, 0, 0)
     sprite.draw(batch)
-    testSkeleton.position(x,y)
+    testSkeleton.position.set(x,y)
     testSkeleton.render(delta, batch)
     batch.end()
     lvlRenderer.render(delta)

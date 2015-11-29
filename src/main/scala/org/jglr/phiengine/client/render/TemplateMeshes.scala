@@ -1,7 +1,7 @@
 package org.jglr.phiengine.client.render
 
 import org.jglr.phiengine.client.render.g2d.Batch
-import org.jglr.phiengine.core.maths.Vector3fExtensions._
+import org.jglr.phiengine.core.maths.VectorfExtensions._
 import org.joml.{Vector2f, Vector3f}
 
 object TemplateMeshes {

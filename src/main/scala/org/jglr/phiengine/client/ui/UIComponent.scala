@@ -7,8 +7,8 @@ import org.jglr.phiengine.client.input.{ButtonMappings, Controller, ControllerLi
 import org.jglr.phiengine.client.render.TextureRegion
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
-import org.jglr.phiengine.core.maths.Vec2
 import org.jglr.phiengine.core.utils.JavaConversions._
+import org.joml.Vector2f
 import org.lwjgl.glfw.GLFW
 import scala.collection.JavaConversions._
 
@@ -49,7 +49,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   var x: Float = 0
   var y: Float = 0
   var z: Float = 0
-  var minSize: Vec2 = new Vec2(10,10)
+  var minSize: Vector2f = new Vector2f(10,10)
   var w: Float = minSize.x
   var h: Float = minSize.y
   private var selected: UIComponent = null
@@ -58,7 +58,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   var state = ComponentState.IDLE
   var time: Float = 0f
   var lastTimeAxisMoved: Float = 0f
-  var margins: Vec2 = new Vec2(0,0)
+  var margins: Vector2f = new Vector2f(0,0)
   var firstSelected: UIComponent = null
   private var enabled = true
   var allowControllerNavigation = true

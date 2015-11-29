@@ -21,6 +21,8 @@ class MessageEncoder(val netHandler: NetworkHandler, val side: NetworkSide) exte
     frame.writerIndex(0)
     msg.write(buffer)
     val l: Int = buffer.writerIndex
+    frame.writeLong(msg.packetIndex)
+    frame.writeLong(msg.answerIndex)
     frame.writeInt(l)
     frame.writeInt(netHandler.getPacketID(side, msg))
     frame.writeByte(side.id)

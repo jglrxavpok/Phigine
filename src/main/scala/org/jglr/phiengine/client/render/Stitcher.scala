@@ -4,8 +4,9 @@ import java.awt._
 import java.awt.image._
 import java.util.{List, ArrayList}
 import org.jglr.phiengine.core.PhiEngine
-import org.jglr.phiengine.core.maths.{Vec2, MathHelper}
+import org.jglr.phiengine.core.maths.MathHelper
 import org.jglr.phiengine.core.utils.ImageUtils
+import org.joml.Vector2f
 
 import scala.collection.JavaConversions._
 
@@ -93,10 +94,10 @@ class Stitcher {
     result
   }
 
-  private def getCoords(x: Int, y: Int, width: Int, height: Int): Vec2 = {
+  private def getCoords(x: Int, y: Int, width: Int, height: Int): Vector2f = {
     val xpos: Float = x + 1f/width.toFloat
     val ypos: Float = y + 1f/height.toFloat
-    new Vec2(xpos / width.toFloat, ypos / height.toFloat)
+    new Vector2f(xpos / width.toFloat, ypos / height.toFloat)
   }
 
   /**

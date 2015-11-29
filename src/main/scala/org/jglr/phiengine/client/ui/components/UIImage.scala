@@ -19,7 +19,7 @@ class UIImage(var image: ITexture, var scale: Float = 1f, var region: TextureReg
     this.region = region
     w = image.getWidth * scale * Math.abs(region.getMaxU - region.getMinU)
     h = image.getHeight * scale * Math.abs(region.getMaxV - region.getMinV)
-    minSize(w, h)
+    minSize.set(w, h)
   }
 
   def setRegion(region: TextureRegion): Unit = {

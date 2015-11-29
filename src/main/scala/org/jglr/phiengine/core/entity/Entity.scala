@@ -1,5 +1,6 @@
 package org.jglr.phiengine.core.entity
 
+import java.util
 import java.util.{ArrayList, List}
 
 import org.jglr.phiengine.client.render.g2d.{SpriteBatch, SpriteComponent}
@@ -17,11 +18,13 @@ import org.jglr.phiengine.core.utils.JavaConversions._
  */
 class Entity(val level: Level) {
 
+  val id = level.getEntityID(this)
+
   /**
    * A list of the components of this entity.
    * For more info about components, go see [[org.jglr.phiengine.core.entity.Component Component]]
    */
-  val components: List[Component] = new ArrayList
+  val components: util.List[Component] = new util.ArrayList
 
   /**
    * The prototype used to create the entity.
@@ -127,8 +130,8 @@ class Entity(val level: Level) {
    * @return
    *         A list with all the instances of the compClass
    */
-  def getComponents[A<:Component](compClass: Class[A]): List[A] = {
-    val result = new ArrayList[A]
+  def getComponents[A<:Component](compClass: Class[A]): util.List[A] = {
+    val result = new util.ArrayList[A]
     components.stream()
       .filter((c: Component) => compClass.isAssignableFrom(c.getClass))
       .forEach((c: Component) => result.add(c.asInstanceOf[A]))

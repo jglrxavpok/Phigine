@@ -2,7 +2,8 @@ package org.jglr.phiengine.client.render.g2d
 
 import com.google.common.base.Preconditions._
 import org.jglr.phiengine.client.render.{Texture, Colors, TextureRegion}
-import org.jglr.phiengine.core.maths.Vec2
+import org.joml.Vector2f
+import org.jglr.phiengine.core.maths.VectorfExtensions._
 
 class Sprite(var texture: Texture, var region: TextureRegion = new TextureRegion(0, 0, 1, 1)) {
   checkNotNull(texture, "texture", Array())
@@ -84,24 +85,24 @@ class Sprite(var texture: Texture, var region: TextureRegion = new TextureRegion
   }
 
   def draw(batch: SpriteBatch) {
-    val bottomLeft: Vec2 = new Vec2(0, 0)
-    val topLeft: Vec2 = new Vec2(0, height * scale)
-    val topRight: Vec2 = new Vec2(width * scale, height * scale)
-    val bottomRight: Vec2 = new Vec2(width * scale, 0)
+    val bottomLeft: Vector2f = new Vector2f(0, 0)
+    val topLeft: Vector2f = new Vector2f(0, height * scale)
+    val topRight: Vector2f = new Vector2f(width * scale, height * scale)
+    val bottomRight: Vector2f = new Vector2f(width * scale, 0)
     batch.setTexture(texture)
-    val rotationCenter: Vec2 = new Vec2(rotationCenterX, rotationCenterY) *= (scale, scale)
-    (bottomLeft -= rotationCenter).rotate(rotation) += rotationCenter
-    (topLeft -= rotationCenter).rotate(rotation) += rotationCenter
-    (topRight -= rotationCenter).rotate(rotation) += rotationCenter
-    (bottomRight -= rotationCenter).rotate(rotation) += rotationCenter
+    val rotationCenter: Vector2f = new Vector2f(rotationCenterX, rotationCenterY).mul(scale)
+    bottomLeft.sub(rotationCenter).rotate(rotation).add(rotationCenter)
+    topLeft.sub(rotationCenter).rotate(rotation).add(rotationCenter)
+    topRight.sub(rotationCenter).rotate(rotation).add(rotationCenter)
+    bottomRight.sub(rotationCenter).rotate(rotation).add(rotationCenter)
     val minU: Float = if (flipX) region.getMaxU else region.getMinU
     val maxU: Float = if (flipX) region.getMinU else region.getMaxU
     val minV: Float = if (flipY) region.getMaxV else region.getMinV
     val maxV: Float = if (flipY) region.getMinV else region.getMaxV
-    batch.addVertex(bottomLeft.getX + x, bottomLeft.getY + y, zIndex, minU, maxV, color)
-    batch.addVertex(topLeft.getX + x, topLeft.getY + y, zIndex, minU, minV, color)
-    batch.addVertex(topRight.getX + x, topRight.getY + y, zIndex, maxU, minV, color)
-    batch.addVertex(bottomRight.getX + x, bottomRight.getY + y, zIndex, maxU, maxV, color)
+    batch.addVertex(bottomLeft.x + x, bottomLeft.y + y, zIndex, minU, maxV, color)
+    batch.addVertex(topLeft.x + x, topLeft.y + y, zIndex, minU, minV, color)
+    batch.addVertex(topRight.x + x, topRight.y + y, zIndex, maxU, minV, color)
+    batch.addVertex(bottomRight.x + x, bottomRight.y + y, zIndex, maxU, maxV, color)
     batch.addIndex(1)
     batch.addIndex(0)
     batch.addIndex(2)

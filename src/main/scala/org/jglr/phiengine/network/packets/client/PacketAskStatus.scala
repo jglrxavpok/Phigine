@@ -18,6 +18,6 @@ object PacketAskStatusHandler extends PacketHandler[PacketAskStatus] {
   }
 
   override def handleServer(packet: PacketAskStatus, channel: NetworkChannel, netHandler: ServerNetHandler): Unit = {
-    channel.writeFlush(new PacketStatus(netHandler.backing.createStatus, 0))
+    channel.answerFlushTo(packet, new PacketStatus(netHandler.backing.createStatus, 0))
   }
 }

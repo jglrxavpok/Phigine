@@ -1,18 +1,18 @@
 package org.jglr.phiengine.core.entity.components
 
 import org.jglr.phiengine.core.entity.{Entity, UpdateComponent}
-import org.jglr.phiengine.core.maths.Vec3
 import org.jglr.phiengine.core.utils.JavaConversions._
+import org.joml.Vector3f
 
 class PositionComponent(entity: Entity) extends UpdateComponent(entity) {
-  val position: Vec3 = new Vec3
-  val velocity: Vec3 = new Vec3
-  val lastPosition: Vec3 = new Vec3
+  val position: Vector3f = new Vector3f
+  val velocity: Vector3f = new Vector3f
+  val lastPosition: Vector3f = new Vector3f
   var isGrounded: Boolean = false
   var wasGrounded: Boolean = false
 
   override def preUpdate(delta: Float): Unit = {
-    lastPosition(position)
+    lastPosition.set(position)
   }
 
   override def update(delta: Float): Unit = {

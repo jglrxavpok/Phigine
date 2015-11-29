@@ -2,27 +2,26 @@ package org.jglr.phiengine.client.ui
 
 import java.util.HashMap
 
-import org.jglr.phiengine.client.ui.components.UILabel
-import org.jglr.phiengine.core.maths.Vec2
+import org.joml.Vector2f
 import scala.collection.JavaConversions._
 
 abstract class UILayout(comp: UIComponent) {
 
-  private val positions = new HashMap[UIComponent, Vec2]
+  private val positions = new HashMap[UIComponent, Vector2f]
 
   def onComponentAdded(added: UIComponent): Unit = {
     resetPosition(added)
   }
 
   def resetPosition(comp: UIComponent) = {
-    positions.put(comp, new Vec2(comp.x, comp.y))
+    positions.put(comp, new Vector2f(comp.x, comp.y))
   }
 
   def onComponentRemoved(removed: UIComponent): Unit = {
     positions.remove(removed)
   }
 
-  def pack(): Vec2 = {
+  def pack(): Vector2f = {
     var minX = Float.PositiveInfinity
     var maxX = Float.NegativeInfinity
     var minY = Float.PositiveInfinity
@@ -41,16 +40,16 @@ abstract class UILayout(comp: UIComponent) {
         maxY = c.y+c.h
     }
 
-    new Vec2(maxX-minX + comp.margins.x*2, maxY-minY + comp.margins.y*2)
+    new Vector2f(maxX-minX + comp.margins.x*2, maxY-minY + comp.margins.y*2)
   }
 
   def recalculatePositions(): Unit
 
-  def getPosition(comp: UIComponent): Vec2 = {
+  def getPosition(comp: UIComponent): Vector2f = {
     positions.get(comp)
   }
 
-  def setPosition(comp: UIComponent, pos: Vec2): Unit = {
+  def setPosition(comp: UIComponent, pos: Vector2f): Unit = {
     getPosition(comp).set(pos)
   }
 }

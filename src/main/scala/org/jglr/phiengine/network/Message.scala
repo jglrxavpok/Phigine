@@ -12,6 +12,8 @@ class Message(val side: NetworkSide, val id: Int) {
   var length: Int = 0
   var channel: NetworkChannel = null
   var networkHandler: NetworkHandler = null
+  var packetIndex: Long = -1L
+  var answerIndex: Long = -1L
 
   def getID: Int = {
     id
@@ -26,6 +28,9 @@ class Message(val side: NetworkSide, val id: Int) {
   @throws(classOf[InstantiationException])
   @throws(classOf[IllegalAccessException])
   def createPacket: Packet = {
-    networkHandler.newPacket(side, id)
+    val packet = networkHandler.newPacket(side, id)
+    packet.packetIndex = packetIndex
+    packet.answerIndex = answerIndex
+    packet
   }
 }

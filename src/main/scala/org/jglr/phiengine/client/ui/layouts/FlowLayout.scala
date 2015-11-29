@@ -2,11 +2,12 @@ package org.jglr.phiengine.client.ui.layouts
 
 import java.util
 import java.util.{LinkedList, List}
+import org.joml.Vector2f
+
 import scala.collection.JavaConversions._
 import org.jglr.phiengine.core.utils.JavaConversions._
 
 import org.jglr.phiengine.client.ui.{UILayout, UIComponent}
-import org.jglr.phiengine.core.maths.Vec2
 
 object FlowLayout extends Enumeration {
   type Type = Value
@@ -25,7 +26,7 @@ class FlowLayout(comp: UIComponent, var xSpacing: Float = 5f, var ySpacing: Floa
     recalculatePositions()
   }
 
-  override def pack(): Vec2 = {
+  override def pack(): Vector2f = {
     recalculatePositions()
     super.pack()
   }

@@ -10,6 +10,7 @@ import org.jglr.phiengine.network._
 
 class NetworkChannel(private val name: String, private val side: NetworkSide) extends ChannelInboundHandler {
   private var context: ChannelHandlerContext = null
+  private var packetIndex: Long = 0L
 
   def getName: String = {
     name
@@ -24,7 +25,19 @@ class NetworkChannel(private val name: String, private val side: NetworkSide) ex
     flush()
   }
 
+  def answerFlushTo(question: Packet, answer: Packet): Unit = {
+    answerTo(question, answer)
+    flush()
+  }
+
+  def answerTo(question: Packet, answer: Packet): Unit = {
+    answer.answerIndex = question.packetIndex
+    write(answer)
+  }
+
   def write(packet: Packet): Unit = {
+    packet.packetIndex = packetIndex
+    packetIndex+=1
     packet.setChannel(name)
     //.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
     context.write(packet).addListener(new GenericFutureListener[ChannelFuture] {

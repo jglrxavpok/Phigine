@@ -1,6 +1,6 @@
 package org.jglr.phiengine.client.render
 
-import org.jglr.phiengine.core.maths.Vec3
+import org.joml.Vector3f
 
 object ColorModel extends Enumeration {
   type Type = Value
@@ -96,8 +96,8 @@ class Color(val r: Float, val g: Float, val b: Float, val a: Float = 1f) {
     new Color(1-r, 1-g, 1-b, a)
   }
 
-  def rgb(): Vec3 = {
-    new Vec3(r, g, b)
+  def rgb(): Vector3f = {
+    new Vector3f(r, g, b)
   }
 
   def toInt(model: ColorModel.Type): Int = {

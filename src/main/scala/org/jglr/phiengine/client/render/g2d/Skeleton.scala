@@ -3,12 +3,13 @@ package org.jglr.phiengine.client.render.g2d
 import java.util
 
 import com.google.common.base.Preconditions._
-import org.jglr.phiengine.core.maths.Vec2
+import org.joml.Vector2f
 
 import scala.collection.JavaConversions._
+import org.jglr.phiengine.core.maths.VectorfExtensions._
 
 class Skeleton extends SkeletonPart(null) {
-  val position = new Vec2(0f, 0f)
+  val position = new Vector2f(0f, 0f)
 
   override def update(delta: Float): Unit = {
     xPos = position.x
@@ -22,12 +23,12 @@ class SkeletonPart(val parent: SkeletonPart) {
   private val children: util.List[SkeletonPart] = new util.ArrayList[SkeletonPart]
   var sprite: Sprite = null
   var angle = 0f
-  val anchor = new Vec2(0f,0f)
+  val anchor = new Vector2f(0f,0f)
   var xPos = 0f
   var yPos = 0f
   var renderAngle = 0f
-  val spriteOffset = new Vec2(0f,0f)
-  val transAnchor: Vec2 = new Vec2(0f,0f)
+  val spriteOffset = new Vector2f(0f,0f)
+  val transAnchor: Vector2f = new Vector2f(0f,0f)
   var renderable = true
 
   def getChildCount: Int = children.size
@@ -38,7 +39,7 @@ class SkeletonPart(val parent: SkeletonPart) {
 
   def createChild(anchorX: Float, anchorY: Float): SkeletonPart = {
     val child = new SkeletonPart(this)
-    child.anchor(anchorX, anchorY)
+    child.anchor.set(anchorX, anchorY)
     addChild(child)
     child
   }
@@ -55,12 +56,12 @@ class SkeletonPart(val parent: SkeletonPart) {
 
   def update(delta: Float): Unit = {
     renderAngle = angle
-    transAnchor(anchor)
+    transAnchor.set(anchor)
     if(parent != null) {
       val parentAngle = parent.renderAngle
       renderAngle += parentAngle
-      val dist = parent.anchor - anchor
-      transAnchor(dist.rotate(parentAngle) += parent.transAnchor)
+      val dist = parent.anchor.sub(anchor)
+      transAnchor.set(dist.rotate(parentAngle).add(parent.transAnchor))
       xPos = -transAnchor.x + parent.xPos
       yPos = -transAnchor.y + parent.yPos
     }
@@ -73,9 +74,9 @@ class SkeletonPart(val parent: SkeletonPart) {
     if(!renderable)
       return
     if(sprite != null) {
-      var offset = spriteOffset
+      val offset = spriteOffset.copy()
       if(parent != null) {
-        offset = spriteOffset + parent.spriteOffset
+        Vector2f.add(spriteOffset, parent.spriteOffset, offset)
       }
       sprite.setRotationCenter(-spriteOffset.x, -spriteOffset.y)
       sprite.setPosition(xPos+offset.x, yPos+offset.y)

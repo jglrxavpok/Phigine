@@ -7,6 +7,9 @@ import org.jglr.phiengine.core.utils.Registry
 import java.lang.reflect.InvocationTargetException
 import java.util
 
+import org.jglr.phiengine.network.packets.client.{PacketAskStatusHandler, PacketAskStatus}
+import org.jglr.phiengine.network.packets.server.{PacketStatusHandler, PacketStatus}
+
 abstract class NetworkHandler {
   private final val channels: Registry[String, NetworkChannel] = new Registry[String, NetworkChannel]
   private final val handlers: Registry[Class[_ <: Packet], PacketHandler[_ <: Packet]] = new Registry[Class[_ <: Packet], PacketHandler[_ <: Packet]]
@@ -14,6 +17,10 @@ abstract class NetworkHandler {
 
   sidePackets.put(NetworkSide.CLIENT, new Registry[Integer, Class[_ <: Packet]])
   sidePackets.put(NetworkSide.SERVER, new Registry[Integer, Class[_ <: Packet]])
+
+  // Default packets, used to recognize games and get server status
+  registerPacket(NetworkSide.CLIENT, 0, classOf[PacketAskStatus], PacketAskStatusHandler)
+  registerPacket(NetworkSide.SERVER, 0, classOf[PacketStatus], PacketStatusHandler)
 
   def registerPacket[T <: Packet](side: NetworkSide, id: Int, packet: Class[T], handler: PacketHandler[T] = null): Unit = {
     sidePackets.get(side).register(id, packet)
