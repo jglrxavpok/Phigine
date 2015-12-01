@@ -9,7 +9,7 @@ class Camera(protected val projectionMatrix: Matrix4f) extends ITickable {
   val position: Vector3f = new Vector3f
   val rotation: Quaternionf = new Quaternionf().identity()
 
-  protected val viewMatrix = new Matrix4f().identity
+  val viewMatrix = new Matrix4f().identity
   private val combined = new Matrix4f().identity
   protected val translationMatrix = new Matrix4f().identity
   protected val rotationMatrix = new Matrix4f().identity

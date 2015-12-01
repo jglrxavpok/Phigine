@@ -3,8 +3,8 @@ package org.jglr.phiengine.client.render
 import java.awt._
 import java.awt.image._
 import java.io._
+import java.util
 import java.util._
-import java.util.{List, ArrayList}
 import javax.imageio._
 import com.google.common.collect._
 //import com.google.gson._
@@ -19,24 +19,27 @@ class TextureMap(var base: FilePointer, var forceResize: Boolean = false, putInC
   private var nullImage: BufferedImage = null
   private var emptyImage: BufferedImage = null
   private var stitcher: Stitcher = null
-  private var registredSprites: List[TextureMapSprite] = null
+  private var registredSprites: util.List[TextureMapSprite] = null
   private var stitchedImage: BufferedImage = null
 
-  registredSprites = new ArrayList[TextureMapSprite]
-  initNullAndEmptyImages
+  registredSprites = new util.ArrayList[TextureMapSprite]
+  initNullAndEmptyImages()
   stitcher = new Stitcher(emptyImage, putInCorner)
 
   /**
    * Completes given FilePointer to get full FilePointer from base
    */
   def completeLocation(loc: FilePointer): FilePointer = {
-    new FilePointer(base.getPath + loc.getPath)
+    if(loc.isAbsolute)
+      loc
+    else
+      new FilePointer(base.getPath + loc.getPath)
   }
 
   /**
    * Instantiates nullImage and emptyImage
    */
-  private def initNullAndEmptyImages {
+  private def initNullAndEmptyImages(): Unit = {
     if (completeLocation(new FilePointer("missigno.png")).exists) {
       try {
         nullImage = ImageUtils.loadImage(completeLocation(new FilePointer("missigno.png")))

@@ -2,6 +2,7 @@ package org.jglr.phiengine.client.render
 
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.utils.Buffers._
+import org.jglr.phiengine.core.utils.IDisposable
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL30._
 import org.lwjgl.opengl.GL11._
@@ -19,7 +20,7 @@ object MeshUtils {
   val vertexSize = 3 + 2 + 3 + 4
 }
 
-class Mesh(verticesNumber: Int, indicesNumber: Int) {
+class Mesh(verticesNumber: Int, indicesNumber: Int) extends IDisposable {
   private final val id: Int = glGenVertexArrays
   private final val verticesBuffer: Int = glGenBuffers
   private final val indicesBuffer: Int = glGenBuffers
@@ -70,6 +71,17 @@ class Mesh(verticesNumber: Int, indicesNumber: Int) {
   def bind() {
     glBindVertexArray(id)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer)
+  }
+
+  def unbind(): Unit = {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+    glBindVertexArray(0)
+  }
+
+  def dispose(): Unit = {
+    glDeleteBuffers(verticesBuffer)
+    glDeleteBuffers(indicesBuffer)
+    glDeleteVertexArrays(id)
   }
 
   def render(drawingMode: Int = defaultDrawMode) {

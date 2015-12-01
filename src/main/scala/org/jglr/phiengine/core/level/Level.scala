@@ -4,8 +4,12 @@ import java.util
 import java.util.{UUID, ArrayList, List}
 
 import org.jglr.phiengine.core.entity._
+import org.jglr.phiengine.core.particle.{Particle, ParticleSystem}
 import org.jglr.phiengine.core.utils.AutoUpdateable
 import org.jglr.phiengine.core.utils.JavaConversions._
+import org.joml.Vector3f
+
+import scala.collection.JavaConversions._
 
 /**
  * A level is a collection of [[org.jglr.phiengine.core.entity.Entity entities]] that interact with each other.
@@ -46,6 +50,16 @@ abstract class Level extends AutoUpdateable {
   }
 
   /**
+    * Collection of all particle system inside this level
+    */
+  val particleSystems = new util.ArrayList[ParticleSystem]
+
+  /**
+    * The main particle system used by this level. Used by the `addParticle` and `removeParticle` methods
+    */
+  val mainParticleSystem = new ParticleSystem
+
+  /**
     * Map containing the ID of each entity in this level.<br/>
     * Calling <pre>entitiesID.get(ent)</pre> will yield the same result as <pre>ent.id</pre>
     */
@@ -68,6 +82,8 @@ abstract class Level extends AutoUpdateable {
     * Is the level currently in the middle of an update?
     */
   var updating = false
+
+  addParticleSystem(mainParticleSystem)
 
   /**
     * Despawns an entity from this level
@@ -140,7 +156,14 @@ abstract class Level extends AutoUpdateable {
       list.forEach((comp: UpdateComponent) => comp.update(delta))
       list.forEach((comp: UpdateComponent) => comp.postUpdate(delta))
     })
+    updateParticles(delta)
     updating = false
+  }
+
+  def updateParticles(delta: Float): Unit = {
+    for(sys <- particleSystems) {
+      sys.tick(delta)
+    }
   }
 
   /**
@@ -183,4 +206,22 @@ abstract class Level extends AutoUpdateable {
     }
     entitiesID.get(entity)
   }
+
+  def addParticleSystem(p: ParticleSystem): Boolean = {
+    particleSystems.add(p)
+  }
+
+  def removeParticleSystem(p: ParticleSystem): Boolean = {
+    particleSystems.remove(p)
+  }
+
+  def addParticle(p: Particle): Boolean = {
+    mainParticleSystem.addParticle(p)
+  }
+
+  def removeParticle(p: Particle): Boolean = {
+    mainParticleSystem.removeParticle(p)
+  }
+
+  def getGravity: Vector3f = new Vector3f(0,0,0)
 }

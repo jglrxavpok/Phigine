@@ -349,6 +349,8 @@ class PhiEngine extends PhigineBase {
       val y: Int = (((4-i-1) / 2) * (displayHeight/2f)).toInt
       mainFramebuffer.copyToWindowArea(GL_COLOR_ATTACHMENT0+i, x, y, displayWidth/2, displayHeight/2)
     }*/
+
+
     mainFramebuffer.copyToWindow(GL_COLOR_ATTACHMENT0)
   }
 

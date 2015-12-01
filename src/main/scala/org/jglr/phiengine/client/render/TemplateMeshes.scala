@@ -161,9 +161,15 @@ object TemplateMeshes {
     mesh
   }
 
-  var cube: Mesh = buildBox(1f, 1f, 1f)
+  def newCube: Mesh = buildBox(1f, 1f, 1f)
 
-  var plane: Mesh = buildPlane(1f, 0f, 1f)
-  
-  var line: Mesh = buildPlane(0f,0.01f,1f)
+  var cube: Mesh = newCube
+
+  def newPlane: Mesh = buildPlane(1f, 0f, 1f)
+
+  var plane: Mesh = newPlane
+
+  def newLine: Mesh = buildPlane(0f,0.01f,1f)
+
+  var line: Mesh = newLine
 }

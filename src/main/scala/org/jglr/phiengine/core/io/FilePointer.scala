@@ -11,6 +11,7 @@ object FilePointer {
 
 class FilePointer(val _path: String, val fileType: FileType.Type = FileType.CLASSPATH) extends Comparable[FilePointer] {
   private final val path: String = _path.replace("\\", "/")
+  val isAbsolute = if(path.isEmpty) false else path.charAt(0) == '/'
 
   @throws(classOf[IOException])
   def createInputStream: InputStream = {

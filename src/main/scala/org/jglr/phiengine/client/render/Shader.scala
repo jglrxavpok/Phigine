@@ -4,7 +4,7 @@ import java.util
 
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.FilePointer
-import org.jglr.phiengine.core.utils.Registry
+import org.jglr.phiengine.core.utils.{IDisposable, Registry}
 import org.joml.{Vector3f, Quaternionf, Vector4f, Matrix4f}
 import org.lwjgl.BufferUtils
 import java.io.IOException
@@ -31,7 +31,7 @@ object Shaders {
   var cache = new util.HashMap[FilePointer, ShaderHandle]
 }
 
-class ShaderHandle(shader: FilePointer) {
+class ShaderHandle(shader: FilePointer) extends IDisposable {
   private val identityMat = new Matrix4f().identity()
   private val uniforms: util.List[Uniform] = new util.ArrayList
   private val locations: util.Map[String, Int] = new util.HashMap
@@ -183,7 +183,7 @@ class ShaderHandle(shader: FilePointer) {
   def setUniformMat4(name: String, m: Matrix4f) {
     val loc: Int = getLocation(name)
     val buffer: FloatBuffer = BufferUtils.createFloatBuffer(16)
-    m.get(buffer).position(16).flip()
+    m.get(buffer)//.position(16).flip()
     glUniformMatrix4fv(loc, false, buffer)
   }
 
@@ -249,10 +249,17 @@ class ShaderHandle(shader: FilePointer) {
   def undefine(s: String) {
     registry.remove(s)
   }
+
+  /**
+    * Called when cleaning up the object
+    */
+  override def dispose(): Unit = {
+    glDeleteProgram(id)
+  }
 }
 
 @throws(classOf[IOException])
-class Shader(shader: FilePointer) {
+class Shader(shader: FilePointer) extends IDisposable {
 
   private var previous: Int = 0
 
@@ -320,6 +327,13 @@ class Shader(shader: FilePointer) {
 
   def unbind() {
     glUseProgram(previous)
+  }
+
+  /**
+    * Called when cleaning up the object
+    */
+  override def dispose(): Unit = {
+    handle.dispose()
   }
 }
 
