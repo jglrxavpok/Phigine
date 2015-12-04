@@ -22,59 +22,18 @@ object ButtonTextures extends ComponentTextures("button_") {
 
 }
 
-class UIButton(fontRenderer: FontRenderer, text: String = null) extends UIComponent(fontRenderer) {
+class UIButton(fontRenderer: FontRenderer, text: String = null) extends ButtonLikeRendering(fontRenderer) {
 
   layout = new FlowLayout(this,5f,5f,FlowLayout.CENTER)
-  var tileWidth: Float = 8f
-  var tileHeight: Float = 8f
-  var drawBackground: Boolean = true
   //layout = new RelativeLayout(this)
   margins.x = 2.5f
   margins.y = 2.5f
 
   if(text != null) {
     val label = new UILabel(fontRenderer, text)
-    label.color = Colors.white//Colors.lightGray lighter()
+    label.color = Colors.white
     addChild(label)
     pack()
-  }
-
-  override def renderSelf(delta: Float, batch: SpriteBatch): Unit = {
-    val state = if(isEnabled) this.state else ComponentState.DISABLED
-    if(drawBackground) {
-      val sw = tileWidth
-      val sh = tileHeight
-      batch.setTexture(UITextures)
-      var i1: Float = sw
-      var j1: Float = sh
-      while (j1 < h - sh) {
-        while (i1 < w - sw) {
-          batch.draw(ButtonTextures.get("center", state), x + i1, y + j1, z, sw, sh, Colors.white)
-          i1 += sw
-        }
-        i1 = sw
-        j1 += sh
-      }
-
-      var i: Float = x + sw
-      while (i <= x + w - sw) {
-        batch.draw(ButtonTextures.get("south", state), i, y, z, sw, sh, Colors.white)
-        batch.draw(ButtonTextures.get("north", state), i, y + h - sh, z, sw, sh, Colors.white)
-        i += sw
-      }
-
-      var j: Float = y + sh
-      while (j <= y + h - sh) {
-        batch.draw(ButtonTextures.get("west", state), x, j, z, sw, sh, Colors.white)
-        batch.draw(ButtonTextures.get("east", state), x + w - sw, j, z, sw, sh, Colors.white)
-        j += sh
-      }
-
-      batch.draw(ButtonTextures.get("bleft", state), x, y, z, sw, sh, Colors.white)
-      batch.draw(ButtonTextures.get("bright", state), x + w - sw, y, z, sw, sh, Colors.white)
-      batch.draw(ButtonTextures.get("tleft", state), x, y + h - sh, z, sw, sh, Colors.white)
-      batch.draw(ButtonTextures.get("tright", state), x + w - sw, y + h - sh, z, sw, sh, Colors.white)
-    }
   }
 
   override def onMoved(): Unit = layout.recalculatePositions()
@@ -132,4 +91,5 @@ class UIButton(fontRenderer: FontRenderer, text: String = null) extends UICompon
     super.onButtonReleased(controller, buttonCode)
   }
 
+  override protected val textures: ComponentTextures = ButtonTextures
 }

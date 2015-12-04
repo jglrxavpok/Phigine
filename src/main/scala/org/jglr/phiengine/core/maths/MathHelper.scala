@@ -4,6 +4,9 @@ import org.joml.{Vector3f, Vector2f}
 
 object MathHelper {
 
+  val Pi = Math.PI
+  val Tau = 2.0*Pi
+  
   val xAxis2f = new Vector2f(1,0)
   val xAxis3f = new Vector3f(1,0,0)
   val yAxis2f = new Vector2f(0,1)

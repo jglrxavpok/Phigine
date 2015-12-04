@@ -1,5 +1,6 @@
 package org.jglr.phiengine.client.ui
 
+import java.util
 import java.util.{Map, HashMap, ArrayList, List}
 
 import org.jglr.phiengine.client.input.PovDirection.Type
@@ -14,11 +15,14 @@ import scala.collection.JavaConversions._
 
 object ComponentState extends Enumeration {
   type Type = Value
-  val IDLE, HOVERED, FOCUSED, DISABLED = Value
+  val IDLE, HOVERED, FOCUSED, DISABLED, OFF, ON = Value
 }
 
 abstract class ComponentTextures(val prefix: String) {
   val texMap = new HashMap[ComponentState.Type, Map[String, TextureRegion]]
+  texMap.put(null, new HashMap[String, TextureRegion])
+  val nullIcon = UITextures.generateIcon("missigno")
+  texMap.get(null).put(null, nullIcon)
 
   def genTextures(): Unit
 
@@ -31,16 +35,20 @@ abstract class ComponentTextures(val prefix: String) {
   }
 
   def get(name: String, state: ComponentState.Type): TextureRegion = {
-    val res = texMap.get(state).get(name)
-    if(res == null || res.isNull) {
-      texMap.get(ComponentState.IDLE).get(name)
+    if(!texMap.containsKey(state)) {
+      texMap.get(null).get(null)
     } else {
-      res
+      val res = texMap.get(state).get(name)
+      if(res == null || res.isNull) {
+        texMap.get(ComponentState.IDLE).get(name)
+      } else {
+        res
+      }
     }
   }
 }
 
-abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener with ControllerListener {
+abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener with ControllerListener with ClickListener {
 
   val children: List[UIComponent] = new ArrayList[UIComponent]
   val childrenToAdd: List[UIComponent] = new ArrayList[UIComponent]
@@ -63,6 +71,15 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   private var enabled = true
   var allowControllerNavigation = true
   private var updating = false
+  private val clickDelegates: util.List[ClickListener] = new util.ArrayList[ClickListener]()
+
+  def addClickDelegate(clickListener: ClickListener): Unit = {
+    clickDelegates.add(clickListener)
+  }
+
+  def removeClickDelegate(clickListener: ClickListener): Unit = {
+    clickDelegates.remove(clickListener)
+  }
 
   def addChild(child: UIComponent, ignoreUpdating: Boolean = false): UIComponent = {
     if(ignoreUpdating || !updating) {
@@ -347,7 +364,11 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
     false
   }
 
-  def onComponentClicked(comp: UIComponent): Unit = {}
+  def onComponentClicked(comp: UIComponent): Unit = {
+    for(delegate <- clickDelegates) {
+      delegate.onComponentClicked(comp)
+    }
+  }
 
   def isMouseOn(mx: Float, my: Float, x: Float, y: Float, w: Float, h: Float): Boolean = {
     (mx > x && mx <= x+w) && (my > y && my <= y+h)

@@ -31,7 +31,7 @@ class FlowLayout(comp: UIComponent, var xSpacing: Float = 5f, var ySpacing: Floa
     super.pack()
   }
 
-  def move(rowList: List[UIComponent], xCentered: Boolean, startX: Float, startY: Float, widthReduction: Float, direction: Int, currentWidth: Float): Float = {
+  def move(rowList: util.List[UIComponent], xCentered: Boolean, startX: Float, startY: Float, widthReduction: Float, direction: Int, currentWidth: Float): Float = {
     if(rowList.isEmpty)
       return 0f
     var currentX = startX
@@ -82,7 +82,7 @@ class FlowLayout(comp: UIComponent, var xSpacing: Float = 5f, var ySpacing: Floa
 
     var currentY = comp.margins.y
     var currentWidth = 0f
-    val rowList = new LinkedList[UIComponent]()
+    val rowList = new util.LinkedList[UIComponent]()
     for(c <- comp.children) {
       if(currentWidth + c.w + xSpacing > comp.w+comp.margins.x*2) {
         currentY += move(rowList, xCentered, startX+comp.margins.x, currentY, widthReduction, direction, currentWidth)+ySpacing
