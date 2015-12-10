@@ -31,27 +31,10 @@ class Assets(engine: PhiEngine, game: Game) {
     if(data.has(dataType)) {
       val list = data.getAsJsonArray(dataType)
       for(s <- list) {
-        val pointer = convertToPointer(s.getAsString)
+        val pointer = s.getAsString
         preload.get(dataType).add(pointer)
       }
     }
   }
 
-  private def convertToPointer(txt: String): FilePointer = {
-    val colonIndex = txt.indexOf(':')
-    val fileType =
-      if(colonIndex < 0) {
-        FileType.CLASSPATH
-      }
-      else {
-        FileType.withName(txt.substring(0, colonIndex).toUpperCase)
-      }
-    val path =
-      if(colonIndex < 0) {
-        txt
-      } else {
-        txt.substring(colonIndex+1)
-      }
-    new FilePointer(path, fileType)
-  }
 }

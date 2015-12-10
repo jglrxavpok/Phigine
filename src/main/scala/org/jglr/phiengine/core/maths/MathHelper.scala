@@ -6,6 +6,9 @@ object MathHelper {
 
   val Pi = Math.PI
   val Tau = 2.0*Pi
+
+  val Pif = Pi.toFloat
+  val Tauf = Tau.toFloat
   
   val xAxis2f = new Vector2f(1,0)
   val xAxis3f = new Vector3f(1,0,0)
@@ -18,15 +21,19 @@ object MathHelper {
    */
   def upperPowerOf2(value: Int): Int = {
     var v = value
-    v -= 1
-    v |= v >> 1
-    v |= v >> 2
-    v |= v >> 4
-    v |= v >> 8
-    v |= v >> 16
-    v |= v >> 32
-    v += 1
-    v
+    if(v == 0) {
+      1
+    } else {
+      v -= 1
+      v |= v >> 1
+      v |= v >> 2
+      v |= v >> 4
+      v |= v >> 8
+      v |= v >> 16
+      v |= v >> 32
+      v += 1
+      v
+    }
   }
 
   private implicit def toArray(value: Seq[Double]): Array[Double] = {

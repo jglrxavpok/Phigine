@@ -5,7 +5,25 @@ import java.io._
 
 object FilePointer {
   implicit def toFilePointer(_path: String): FilePointer = {
-    new FilePointer(_path)
+    convertToPointer(_path)
+  }
+
+  def convertToPointer(txt: String): FilePointer = {
+    val colonIndex = txt.indexOf(':')
+    val fileType =
+      if(colonIndex < 0) {
+        FileType.CLASSPATH
+      }
+      else {
+        FileType.withName(txt.substring(0, colonIndex).toUpperCase)
+      }
+    val path =
+      if(colonIndex < 0) {
+        txt
+      } else {
+        txt.substring(colonIndex+1)
+      }
+    new FilePointer(path, fileType)
   }
 }
 

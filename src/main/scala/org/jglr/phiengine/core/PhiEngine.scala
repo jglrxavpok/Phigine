@@ -28,11 +28,9 @@ import org.jglr.phiengine.network.server.Server
 import org.jglr.phiengine.network.{NetworkSide, NetworkHandler}
 import org.joml.{Vector4f, Vector3f, Matrix4f}
 import org.lwjgl.BufferUtils
-import org.lwjgl.glfw.Callbacks
-import org.lwjgl.glfw.GLFW
-import org.lwjgl.glfw.GLFWvidmode
+import org.lwjgl.glfw.{GLFWErrorCallback, GLFWVidMode, Callbacks, GLFW}
 import org.lwjgl.opengl._
-import org.lwjgl.system.MemoryUtil
+import org.lwjgl.system.{Library, Configuration, MemoryUtil}
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.{File, IOException}
@@ -161,6 +159,7 @@ class PhiEngine extends PhigineBase {
   private var sphere: Model = null
   private var pointLightShader: Shader = null
   private var defaultShader: Shader = null
+  private var nanoContext: NanoVGContext = null
 
   // Variables used to render text on loading
   private var loadingY = 0f
@@ -377,7 +376,7 @@ class PhiEngine extends PhigineBase {
   private def initLJWGL(config: PhiConfig) {
     try {
       LWJGLSetup.load(nativesFolder, logger)
-      GLFW.glfwSetErrorCallback(Callbacks.errorCallbackPrint)
+      GLFW.glfwSetErrorCallback(GLFWErrorCallback.createPrint())
       if (glfwInit == GL_FALSE) {
         PhiEngine.crash("GLFW could not be init... ;c")
       }
@@ -395,21 +394,23 @@ class PhiEngine extends PhigineBase {
       glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
       glfwWindowHint(GLFW_DECORATED, if (config.decorated && !config.fullscreen) GL_TRUE else GL_FALSE)
       window = new WindowPointer(glfwCreateWindow(displayWidth, displayHeight, config.title, monitor, MemoryUtil.NULL))
-      val vidmode: GLFWvidmode = new GLFWvidmode(glfwGetVideoMode(primaryMonitor))
+      val vidmode: GLFWVidMode = glfwGetVideoMode(primaryMonitor)
       if (!config.fullscreen && config.centered) {
-        window.setPos(vidmode.getWidth / 2 - displayWidth / 2, vidmode.getHeight / 2 - displayHeight / 2)
+        window.setPos(vidmode.width / 2 - displayWidth / 2, vidmode.height / 2 - displayHeight / 2)
       }
       glfwMakeContextCurrent(window.getPointer)
       glfwSwapInterval(1)
-      GLContext.createFromCurrent
       if(config.fullscreen) {
-        vidmode.setWidth(config.width)
-        vidmode.setHeight(config.height)
+        //vidmode.setWidth(config.width)
+        //vidmode.setHeight(config.height)
       }
       window.setSize(displayWidth, displayHeight)
       inputHandler = new InputHandler(this)
       inputQueue = new InputProcessorQueue(inputHandler)
       window.show
+
+      GL.createCapabilities()
+
       setInputProcessor(inputQueue)
       glEnable(GL_BLEND)
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -418,6 +419,7 @@ class PhiEngine extends PhigineBase {
       geometryShader = new Shader("assets/shaders/passes/geometry.glsl")
       pointLightShader = new Shader("assets/shaders/passes/pointLight.glsl")
       defaultShader = new Shader("assets/shaders/passes/default.glsl")
+      nanoContext = new NanoVGContext(true)
     }
     catch {
       case e: IOException => {
@@ -427,7 +429,7 @@ class PhiEngine extends PhigineBase {
   }
 
   private def setInputProcessor(processor: InputProcessor) {
-    Callbacks.releaseAllCallbacks(window.getPointer)
+    Callbacks.glfwReleaseCallbacks(window.getPointer)
     glfwSetCharCallback(window.getPointer, processor.charCallback)
     glfwSetCursorPosCallback(window.getPointer, processor.cursorPosCallback)
     glfwSetKeyCallback(window.getPointer, processor.keyCallback)
@@ -469,7 +471,7 @@ class PhiEngine extends PhigineBase {
   def checkGLError(location: String) {
     val glError: Int = glGetError
     if (glError != GL_NO_ERROR) {
-      logger.error("OpenGL Error: " + GLContext.translateGLErrorString(glError) + " at " + location)
+      logger.error("OpenGL Error: " + GLUtil.getErrorString(glError) + " at " + location)
     }
   }
 
@@ -553,4 +555,6 @@ class PhiEngine extends PhigineBase {
   }
 
   def getMainFrameBuffer: Framebuffer = mainFramebuffer
+
+  def getNanoVGContext: NanoVGContext = nanoContext
 }

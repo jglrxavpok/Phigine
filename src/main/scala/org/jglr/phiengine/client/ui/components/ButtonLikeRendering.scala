@@ -14,6 +14,7 @@ abstract class ButtonLikeRendering(fontRenderer: FontRenderer) extends UICompone
 
   override def renderSelf(delta: Float, batch: SpriteBatch): Unit = {
     val state = if(isEnabled) this.state else ComponentState.DISABLED
+    val prevTexture = batch.getCurrentTexture
     if(drawBackground) {
       val sw = tileWidth
       val sh = tileHeight
@@ -48,5 +49,6 @@ abstract class ButtonLikeRendering(fontRenderer: FontRenderer) extends UICompone
       batch.draw(textures.get("tleft", state), x, y + h - sh, z, sw, sh, Colors.white)
       batch.draw(textures.get("tright", state), x + w - sw, y + h - sh, z, sw, sh, Colors.white)
     }
+    batch.setTexture(prevTexture)
   }
 }

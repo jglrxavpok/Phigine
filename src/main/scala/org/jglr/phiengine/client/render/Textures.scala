@@ -54,7 +54,7 @@ class Texture(pointer: FilePointer, filter: Int = GL_NEAREST, _img: BufferedImag
   }
 
   def unbind(): Unit = {
-    handle.unbind
+    handle.unbind()
   }
 
   def dispose() {
@@ -70,12 +70,17 @@ class TextureHandle(pointer: FilePointer, filter: Int, _img: BufferedImage = nul
   var img: BufferedImage =
     if(_img == null) {
       try {
+        if(pointer.getType == FileType.VIRTUAL && pointer.getPath.equals("null")) {
+          throw new Exception
+        }
         ImageIO.read(pointer.createInputStream)
       }
       catch {
         case e: Exception =>
-          e.printStackTrace()
-          PhiEngine.getInstance.getLogger.error("Could not find texture " + pointer + ", loading placeholder texture instead!")
+          if(pointer.getType != FileType.VIRTUAL || !pointer.getPath.equals("null")) {
+            e.printStackTrace()
+            PhiEngine.getInstance.getLogger.error("Could not find texture " + pointer + ", loading placeholder texture instead!")
+          }
           val placeholder = new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB)
           placeholder.setRGB(0,0,0xFFFFFFFF)
           placeholder.setRGB(1,1,0xFFFFFFFF)

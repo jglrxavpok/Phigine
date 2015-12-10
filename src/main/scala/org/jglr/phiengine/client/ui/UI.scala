@@ -11,6 +11,7 @@ import org.jglr.phiengine.client.ui.components.{ButtonTextures, UIButton}
 import org.jglr.phiengine.core.PhiEngine
 import org.jglr.phiengine.core.io.FilePointer
 import org.jglr.phiengine.core.utils.AutoUpdateable
+import org.lwjgl.nanovg.NanoVG
 
 import scala.reflect.ClassTag
 
@@ -42,6 +43,7 @@ class UI(var fontRenderer: FontRenderer = null) extends UIComponent(fontRenderer
 
   override def render(delta: Float, batch: SpriteBatch = batch): Unit = {
     var wasDrawing = true
+
     fontRenderer.batch.begin()
     if(!batch.isDrawing) {
       wasDrawing = false

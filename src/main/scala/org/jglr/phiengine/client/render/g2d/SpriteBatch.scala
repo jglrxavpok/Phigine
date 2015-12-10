@@ -1,6 +1,7 @@
 package org.jglr.phiengine.client.render.g2d
 
 import org.jglr.phiengine.client.render._
+import org.lwjgl.opengl.GL11._
 
 /**
  * Batch specialized in sprite rendering (aka. textured quads)
@@ -132,8 +133,13 @@ class SpriteBatch(val spriteLimit: Int = 100) extends Batch(spriteLimit * MeshUt
     if (texture != currentText) {
       flush()
       this.currentText = texture
-      currentText.bind()
+      if(currentText != null)
+        currentText.bind()
+      else
+        glBindTexture(GL_TEXTURE_2D, 0)
     }
   }
+
+  def getCurrentTexture: ITexture = currentText
 
 }

@@ -21,7 +21,8 @@ class Model(var mesh: Mesh, var texture: Texture) {
       shader.setUniformMat4("u_modelview", computeModelview())
     }
     mesh.bind()
-    texture.bind()
+    if(texture != null)
+      texture.bind()
     mesh.render()
   }
 }

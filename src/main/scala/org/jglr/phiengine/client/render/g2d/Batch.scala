@@ -1,6 +1,6 @@
 package org.jglr.phiengine.client.render.g2d
 
-import org.jglr.phiengine.client.render.{Colors, Color, Shader, Mesh}
+import org.jglr.phiengine.client.render._
 
 /**
  * Class used for rendering inside with a mesh.<br/>
@@ -13,7 +13,7 @@ import org.jglr.phiengine.client.render.{Colors, Color, Shader, Mesh}
  *                      The default shader to use, if any
  */
 abstract class Batch(verticesCount: Int, indicesCount: Int, defaultShader: Shader = null) {
-  protected val verticesData = new Array[Float](verticesCount)
+  protected val verticesData = new Array[Float](verticesCount*MeshUtils.vertexSize)
   protected val indices = new Array[Int](indicesCount)
   protected val mesh = new Mesh(verticesCount, indicesCount)
   protected var indexOffset: Int = 0

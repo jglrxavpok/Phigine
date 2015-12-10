@@ -97,10 +97,10 @@ class ShapeBatch(val mode: ShapeMode.Type = ShapeMode.FILLED, val maxVertices: I
     val topRightCol = colors._3
     val bottomRightCol = colors._4
     val offset = if(shapeMode == ShapeMode.LINES) 1 else 0
-    addVertex(x, y-offset/*-offset to avoid an empty pixel in bottom left corner, dirty hack :c*/, z, 0, 0, bottomLeftCol)
-    addVertex(x + width - offset, y, z, 0, 0, bottomRightCol)
-    addVertex(x + width - offset, y + height - offset, z, 0, 0, topRightCol)
-    addVertex(x, y + height - offset, z, 0, 0, topLeftCol)
+    addVertex(x, y, z, 0, 0, bottomLeftCol)
+    addVertex(x + width-1, y, z, 0, 0, bottomRightCol)
+    addVertex(x + width-1, y + height-1, z, 0, 0, topRightCol)
+    addVertex(x, y + height-1, z, 0, 0, topLeftCol)
     if(shapeMode == ShapeMode.FILLED) {
       addIndex(1)
       addIndex(0)

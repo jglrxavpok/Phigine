@@ -58,6 +58,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
   var y: Float = 0
   var z: Float = 0
   var minSize: Vector2f = new Vector2f(10,10)
+  var maxSize: Vector2f = new Vector2f(Float.PositiveInfinity,Float.PositiveInfinity)
   var w: Float = minSize.x
   var h: Float = minSize.y
   private var selected: UIComponent = null
@@ -149,14 +150,14 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
           if(c.y+c.h > maxY)
             maxY = c.y+c.h
         }
-        w = Math.max(minSize.x, maxX-minX)
-        h = Math.max(minSize.y, maxY-minY)
+        w = Math.min(Math.max(minSize.x, maxX-minX), maxSize.x)
+        h = Math.min(Math.max(minSize.y, maxY-minY), maxSize.y)
       }
     } else {
       layout.recalculatePositions()
       val size = layout.pack()
-      w = Math.max(minSize.x, size.x)
-      h = Math.max(minSize.y, size.y)
+      w = Math.min(Math.max(minSize.x, size.x), maxSize.x)
+      h = Math.min(Math.max(minSize.y, size.y), maxSize.y)
     }
   }
 

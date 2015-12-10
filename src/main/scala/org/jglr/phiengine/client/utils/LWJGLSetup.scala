@@ -7,19 +7,21 @@ import java.util.regex._
 import com.google.common.collect._
 import org.jglr.phiengine.core.utils.OperatingSystem.Type
 import org.jglr.phiengine.core.utils._
+import org.lwjgl.system.{Library, Configuration}
 import org.slf4j._
 
 object LWJGLSetup extends NativesSetup {
   override protected def postLoad(folder: File, logger: Logger): Unit = {
-    System.setProperty("net.java.games.input.librarypath", folder.getAbsolutePath)
-    System.setProperty("org.lwjgl.librarypath", folder.getAbsolutePath)
+    //System.setProperty("org.lwjgl.librarypath", folder.getAbsolutePath)
+    //Configuration.LIBRARY_PATH.set(folder.getAbsolutePath)
+    Library.initialize()
     logger.info("Setup LWJGL paths to "+folder.getAbsolutePath)
   }
 
   override protected def createNativesMap: util.Map[Type, Array[String]] = {
     val nativesMap: Map[OperatingSystem.Type, Array[String]] = new util.HashMap[OperatingSystem.Type, Array[String]]()
 
-    val win: Array[String] = Array[String]("lwjgl32.dll", "OpenAL32.dll", "jinput-dx8.dll", "jinput-raw.dll", "jinput-wintab.dll")
+    val win: Array[String] = Array[String]("lwjgl32.dll", "OpenAL32.dll", "glfw32.dll", "jemalloc.dll")
     nativesMap.put(OperatingSystem.WINDOWS, win)
 
     val macosx: Array[String] = Array[String]("liblwjgl.dylib", "libopenal.dylib", "libjinput-osx.jnilib")
