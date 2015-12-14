@@ -1,6 +1,7 @@
 package org.jglr.phiengine.client.ui.components
 
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
+import org.jglr.phiengine.client.render.nanovg.NanoCanvas
 import org.jglr.phiengine.client.render.{Color, Colors}
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
 import org.jglr.phiengine.client.ui.UIComponent
@@ -27,13 +28,13 @@ class UILabel(fontRenderer: FontRenderer, _text: String = "") extends UIComponen
 
   def getText: String = text
 
-  override def renderSelf(delta: Float, batch: SpriteBatch) = {
+  override def renderSelf(delta: Float, batch: SpriteBatch, canvas: NanoCanvas) = {
     fontRenderer.renderString(text, x, y, z, color, scale)
   }
 
   override def pack(): Unit = {
-    w = fontRenderer.font.getWidth(text)*scale
-    h = fontRenderer.font.getHeight(text)*scale
+    w = fontRenderer.getWidth(text)*scale
+    h = fontRenderer.getHeight(text)*scale
   }
 
 

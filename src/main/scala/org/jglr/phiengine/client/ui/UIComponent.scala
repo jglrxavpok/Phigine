@@ -7,6 +7,7 @@ import org.jglr.phiengine.client.input.PovDirection.Type
 import org.jglr.phiengine.client.input.{ButtonMappings, Controller, ControllerListener, InputListener}
 import org.jglr.phiengine.client.render.TextureRegion
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
+import org.jglr.phiengine.client.render.nanovg.NanoCanvas
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
 import org.jglr.phiengine.core.utils.JavaConversions._
 import org.joml.Vector2f
@@ -161,9 +162,9 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
     }
   }
 
-  def render(delta: Float, batch: SpriteBatch): Unit = {
-    renderSelf(delta, batch)
-    children.forEach((c: UIComponent) => c.render(delta, batch))
+  def render(delta: Float, batch: SpriteBatch, canvas: NanoCanvas): Unit = {
+    renderSelf(delta, batch, canvas)
+    children.forEach((c: UIComponent) => c.render(delta, batch, canvas))
   }
 
   def updateSelf(delta: Float) = {
@@ -184,7 +185,7 @@ abstract class UIComponent(fontRenderer: FontRenderer) extends InputListener wit
     }
   }
 
-  def renderSelf(delta: Float, batch: SpriteBatch) = {}
+  def renderSelf(delta: Float, batch: SpriteBatch, canvas: NanoCanvas) = {}
 
   def update(delta: Float): Unit = {
     updating = true

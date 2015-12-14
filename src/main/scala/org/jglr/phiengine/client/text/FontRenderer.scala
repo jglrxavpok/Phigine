@@ -88,4 +88,12 @@ class FontRenderer(val supportedChars: Array[Char], _font: Font = null) {
     }
     -1
   }
+
+  def getWidth(text: String): Float = {
+    font.getWidth(text)
+  }
+
+  def getHeight(text: String): Float = {
+    font.getHeight(text)
+  }
 }

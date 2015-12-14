@@ -1,6 +1,7 @@
 package org.jglr.phiengine.client.ui.components
 
 import com.google.common.base.Objects
+import org.jglr.phiengine.client.render.nanovg.NanoCanvas
 import org.jglr.phiengine.client.render.{Colors, TextureRegion, ITexture}
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.ui.UIComponent
@@ -27,8 +28,7 @@ class UIImage(var image: ITexture, var scale: Float = 1f, var region: TextureReg
     this.region = region
   }
 
-  override def renderSelf(delta: Float, batch: SpriteBatch): Unit = {
-    super.renderSelf(delta, batch)
+  override def renderSelf(delta: Float, batch: SpriteBatch, canvas: NanoCanvas): Unit = {
     batch.setTexture(image)
     batch.draw(region, x, y, z, w, h, Colors.white)
   }

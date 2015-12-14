@@ -3,6 +3,7 @@ package org.jglr.phiengine.client.ui
 import java.util.{List, ArrayList}
 
 import org.jglr.phiengine.client.input.InputProcessor
+import org.jglr.phiengine.client.render.nanovg.NanoCanvas
 import org.jglr.phiengine.client.render.{TextureRegion, TextureMapSprite, TextureMap}
 import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.text.{FontRenderer, Font}
@@ -33,23 +34,29 @@ class UI(var fontRenderer: FontRenderer = null) extends UIComponent(fontRenderer
     fontRenderer = new FontRenderer(FontRenderer.ASCII, Font.get("Arial", 28, antialias = false))
   }
 
+  val canvas = new NanoCanvas(antialiasing = true)
   val batch = new SpriteBatch(500)
   batch.setTexture(UITextures)
 
   w = engine.getDisplayWidth
-  h = engine.getDisplayWidth
+  h = engine.getDisplayHeight
 
   engine.addInputListener(this)
 
-  override def render(delta: Float, batch: SpriteBatch = batch): Unit = {
+  override def render(delta: Float, batch: SpriteBatch = batch, canvas: NanoCanvas = canvas): Unit = {
     var wasDrawing = true
 
+    canvas.resetState()
+    canvas.resetScissor()
+    canvas.resetTransformation()
+    canvas.startDrawing(w.toInt, h.toInt)
     fontRenderer.batch.begin()
     if(!batch.isDrawing) {
       wasDrawing = false
     }
     batch.setTexture(UITextures)
-    super.render(delta, batch)
+    super.render(delta, batch, canvas)
+    canvas.stopDrawing()
     if(!wasDrawing) {
       batch.end()
     }

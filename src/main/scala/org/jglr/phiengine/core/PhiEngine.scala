@@ -16,6 +16,7 @@ import org.jglr.phiengine.client.render.g2d.SpriteBatch
 import org.jglr.phiengine.client.render._
 import org.jglr.phiengine.client.render.g3d.{Model, DMXModelLoader}
 import org.jglr.phiengine.client.render.lighting.{AmbientLight, LightComponent, PointLight}
+import org.jglr.phiengine.client.render.nanovg.NanoCanvas
 import org.jglr.phiengine.client.text.{FontFormat, Font, FontRenderer}
 import org.jglr.phiengine.client.utils.{LWJGLSetup, Timer}
 import org.jglr.phiengine.core.game.Game
@@ -159,7 +160,7 @@ class PhiEngine extends PhigineBase {
   private var sphere: Model = null
   private var pointLightShader: Shader = null
   private var defaultShader: Shader = null
-  private var nanoContext: NanoVGContext = null
+  private var nanoCanvas: NanoCanvas = null
 
   // Variables used to render text on loading
   private var loadingY = 0f
@@ -419,7 +420,7 @@ class PhiEngine extends PhigineBase {
       geometryShader = new Shader("assets/shaders/passes/geometry.glsl")
       pointLightShader = new Shader("assets/shaders/passes/pointLight.glsl")
       defaultShader = new Shader("assets/shaders/passes/default.glsl")
-      nanoContext = new NanoVGContext(true)
+      nanoCanvas = new NanoCanvas(true)
     }
     catch {
       case e: IOException => {
@@ -459,7 +460,7 @@ class PhiEngine extends PhigineBase {
 
   private def fromCache[T](obj: JsonObject, cache: util.HashMap[FilePointer, T], assetType: String): Unit = {
     val assetList = new JsonArray
-    val v = cache.keySet.stream.sorted().forEach((f: FilePointer) => {
+    cache.keySet.stream.sorted().forEach((f: FilePointer) => {
       if(f.getType != FileType.VIRTUAL) {
         val t = f.getType
         assetList.add(new JsonPrimitive(t.toString.toLowerCase+":"+f.getPath))
@@ -556,5 +557,5 @@ class PhiEngine extends PhigineBase {
 
   def getMainFrameBuffer: Framebuffer = mainFramebuffer
 
-  def getNanoVGContext: NanoVGContext = nanoContext
+  def getNanoCanvas: NanoCanvas = nanoCanvas
 }

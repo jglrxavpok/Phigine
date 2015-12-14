@@ -1,5 +1,6 @@
 package org.jglr.phiengine.client.ui.components
 
+import org.jglr.phiengine.client.render.nanovg.NanoCanvas
 import org.jglr.phiengine.client.render.{Colors, ScreenLock}
 import org.jglr.phiengine.client.render.g2d.{ShapeMode, ShapeBatch, SpriteBatch}
 import org.jglr.phiengine.client.text.FontRenderer
@@ -24,14 +25,19 @@ class UIScrollablePanel(fontRenderer: FontRenderer, components: UIComponent*) ex
     shapeBatch.rectangle(x, y, 0, w, h, borderColor)
   }
 
-  override def render(delta: Float, batch: SpriteBatch): Unit = {
-    lock.enableLock(x, y, w, h)
+  override def render(delta: Float, batch: SpriteBatch, canvas: NanoCanvas): Unit = {
+    canvas.resetScissor()
+    canvas.scissor(x.toInt, y.toInt, w.toInt, h.toInt)
+
     fontRenderer.batch.flush()
     batch.flush()
-    super.render(delta, batch)
+    super.render(delta, batch, canvas)
+    canvas.flush()
+    lock.enableLock(x, y, w, h)
     batch.flush()
     fontRenderer.batch.flush()
     lock.disableLock()
+    canvas.resetScissor()
 
     drawBorder(delta)
   }
