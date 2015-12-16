@@ -26,9 +26,6 @@ class UIScrollablePanel(fontRenderer: FontRenderer, components: UIComponent*) ex
   }
 
   override def render(delta: Float, batch: SpriteBatch, canvas: NanoCanvas): Unit = {
-    canvas.resetScissor()
-    canvas.scissor(x.toInt, y.toInt, w.toInt, h.toInt)
-
     fontRenderer.batch.flush()
     batch.flush()
     super.render(delta, batch, canvas)
@@ -37,7 +34,6 @@ class UIScrollablePanel(fontRenderer: FontRenderer, components: UIComponent*) ex
     batch.flush()
     fontRenderer.batch.flush()
     lock.disableLock()
-    canvas.resetScissor()
 
     drawBorder(delta)
   }
